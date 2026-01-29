@@ -1,4 +1,5 @@
-@startuml Estudiante
+classDiagram
+direction LR
 class Estudiante {
   -id : int
   -nombre : string
@@ -18,6 +19,6 @@ class Curso {
 }
  
 Estudiante "1" --> "*" Curso : matrícula
-@enduml
+
 
  
