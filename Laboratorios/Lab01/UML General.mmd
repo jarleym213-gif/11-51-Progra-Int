@@ -1,0 +1,34 @@
+classDiagram
+direction LR
+
+class Profesor {
+  +int IdCatalogo1
+  +string Nombre
+  +bool Activo
+}
+
+class Estudiante {
+  +int Idestudiante_FK
+  +int IdEstudiante
+  +string Nombre
+  +bool Activo
+}
+
+class Curso {
+  +int IdCurso
+  +int IdCatalogo1_FK
+  +int IdCatalogo2_FK
+  +date Fecha
+  +string Estado
+}
+
+class Persona {
+  +int IdPersona
+  +string Nombre
+  +string Correo
+  +bool Activo
+}
+
+Profesor "1" --> "0..*" Curso : FK
+Estudiante "1" --> "0..*" Curso : FK
+Persona "1" --> "0..*" Estudiante : participa
