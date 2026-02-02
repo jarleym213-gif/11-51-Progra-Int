@@ -1,0 +1,103 @@
+classDiagram
+direction LR
+
+%% Usuario-base
+class Usuario {
+  +int IdUsuario
+  +string Nombre
+  +string Correo
+  +string Telefono
+  +string Contraseña
+  +bool Activo
+}
+
+class Cliente {
+  +int IdCliente
+}
+
+class Empleado {
+  +int IdEmpleado
+  +string Cargo
+}
+
+Usuario <|-- Cliente
+Usuario <|-- Empleado
+
+%% Producto y categoría
+class Producto {
+  +int IdProducto
+  +string Nombre
+  +string Marca
+  +string Modelo
+  +string Compatibilidad
+  +int GarantiaMeses
+  +float Precio
+  +int Stock
+  +bool Activo
+}
+
+%% Categorias
+class Categoria {
+  +int IdCategoria
+  +string Nombre
+  +string Descripcion
+  +bool Activo
+}
+
+Producto "0..*" --> "1" Categoria : Pertenece_a
+
+
+%% Carrito
+class Carrito {
+  +int IdCarrito
+}
+
+class DetalleCarrito {
+  +int IdDetalleCarrito
+  +int Cantidad
+  +float Subtotal
+}
+
+Usuario "1" --> "0..1" Carrito : Posee
+Carrito "1" --> "1..*" DetalleCarrito : Contiene
+Producto "1" --> "0..*" DetalleCarrito : Agregado
+
+
+%% PEDIDOS
+class Pedido {
+  +int IdPedido
+  +date Fecha
+  +float Total
+  +string Estado
+}
+
+%% Detalles de pedido
+class DetallePedido {
+  +int IdDetallePedido
+  +int Cantidad
+  +float PrecioUnitario
+}
+
+Cliente "1" --> "0..*" Pedido : Realiza_compra
+Pedido "1" --> "1..*" DetallePedido : Contiene
+Producto "1" --> "0..*" DetallePedido : Incluye
+
+
+%% Ventas
+class Venta {
+  +int IdVenta
+  +date Fecha
+  +float Total
+  +string Estado
+}
+
+class DetalleVenta {
+  +int IdDetalleVenta
+  +int Cantidad
+  +float Subtotal
+}
+
+Pedido "1" --> "0..1" Venta : Se_convierte_en
+Empleado "1" --> "0..*" Venta : Registra
+Venta "1" --> "1..*" DetalleVenta
+Producto "1" --> "0..*" DetalleVenta
