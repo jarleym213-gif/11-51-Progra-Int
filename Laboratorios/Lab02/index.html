@@ -16,12 +16,44 @@
         
 
     }
+    .styled {
+        background-color: #f0f8ff;
+        color: #333;
+        font-family: Arial, sans-serif;
+    }
+       .styled table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+ 
+        .styled th, .styled td {
+            border: 1px solid #ccc;
+            padding: 8px;
+        }
+ 
+        .styled th {
+            background: #0b3c5d;
+            color: white;
+        }
+ 
+        .styled a {
+            color: #0b3c5d;
+            font-weight: bold;
+        }
+
+.styled img {
+    display: block;
+    margin: 20px auto;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    max-width: 100%;
+}
 
    </style>
 </head>
 
 <body>
-    <button class="btn">Ver antes y despues</button>
+   <button class="btn" onclick="activarEstilos()">Ver antes / después</button>
     <h1>Lab 02</h1>
     <p>Este es el primer laboratorio de la asignatura.</p>
     <p>En este laboratorio, aprenderemos los conceptos básicos de HTML y CSS.</p>
@@ -81,9 +113,14 @@
             alt="Imagen Naturaleza">
     </a>
 
-
+<script>
+        function activarEstilos() {
+            document.body.classList.toggle('styled');
+        }
+    </script>
 
     <p>Para más información, visita el sitio web oficial.</p>
 </body>
+
 
 </html>
