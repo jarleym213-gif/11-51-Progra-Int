@@ -1,5 +1,5 @@
- body{
-      background-color: rgba(0, 0, 0, 0.623);
+    body{
+      background-color: rgba(141, 172, 175, 0.623);
     }
     .form-group label {
       display: block;
@@ -24,3 +24,57 @@
       background-color: #2563eb;
       /* Un azul más oscuro al pasar el mouse */
     }
+   
+   #main-title {
+    font-size: 2.5em;
+    color: #0c0d23;
+    text-align: center;
+    margin-bottom: 20px;
+    margin-top: 1.5em;
+   }  
+   #title {
+    font-size: 1.5em;
+    color: #0c0d23;
+    text-align: center;
+    margin-bottom: 20px;
+   }
+   .title {
+    font-family: 'Arial', sans-serif;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+   }
+   .nav-menu ul{
+
+    padding: 10px;
+    text-align: center;
+    justify-self: center;
+    display: flex;
+    list-style-type: none;
+   }
+   .nav-menu ul li {
+    margin: 0 15px;
+    background-color: #2563eb;
+    padding: 10px 20px;
+    border-radius: 5px; 
+    
+   } 
+   .nav-menu  ul li a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+   }   
+   .form-group {
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    
+   }
+   .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+   }
+   .form-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+   }
