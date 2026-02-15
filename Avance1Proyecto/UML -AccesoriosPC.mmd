@@ -1,0 +1,125 @@
+classDiagram
+direction LR
+
+%% =========================
+%% USUARIO BASE
+%% =========================
+class Usuario {
+  +int IdUsuario
+  +string Nombre
+  +string Correo
+  +string Telefono
+  +string Contraseña
+  +bool Activo
+}
+
+class Cliente {
+  +int IdCliente
+  +int IdUsuario_FK
+}
+
+class Empleado {
+  +int IdEmpleado
+  +int IdUsuario_FK
+  +string Cargo
+}
+
+Usuario <|-- Cliente
+Usuario <|-- Empleado
+
+
+%% =========================
+%% CATEGORIA Y PRODUCTO
+%% =========================
+class Categoria {
+  +int IdCategoria
+  +string Nombre
+  +string Descripcion
+  +bool Activo
+}
+
+class Producto {
+  +int IdProducto
+  +int IdCategoria_FK
+  +string Nombre
+  +string Marca
+  +string Modelo
+  +string Compatibilidad
+  +int GarantiaMeses
+  +float Precio
+  +int Stock
+  +bool Activo
+}
+
+Producto "0..*" --> "1" Categoria : Pertenece_a
+
+
+%% =========================
+%% CARRITO
+%% =========================
+class Carrito {
+  +int IdCarrito
+  +int IdCliente_FK
+}
+
+class DetalleCarrito {
+  +int IdDetalleCarrito
+  +int IdCarrito_FK
+  +int IdProducto_FK
+  +int Cantidad
+  +float Subtotal
+}
+
+Cliente "1" --> "0..1" Carrito : Posee
+Carrito "1" --> "1..*" DetalleCarrito : Contiene
+Producto "1" --> "0..*" DetalleCarrito : Agregado
+
+
+%% =========================
+%% PEDIDOS
+%% =========================
+class Pedido {
+  +int IdPedido
+  +int IdCliente_FK
+  +date Fecha
+  +float Total
+  +string Estado
+}
+
+class DetallePedido {
+  +int IdDetallePedido
+  +int IdPedido_FK
+  +int IdProducto_FK
+  +int Cantidad
+  +float PrecioUnitario
+}
+
+Cliente "1" --> "0..*" Pedido : Realiza_compra
+Pedido "1" --> "1..*" DetallePedido : Contiene
+Producto "1" --> "0..*" DetallePedido : Incluye
+
+
+%% =========================
+%% VENTAS
+%% =========================
+class Venta {
+  +int IdVenta
+  +int IdPedido_FK
+  +int IdEmpleado_FK
+  +date Fecha
+  +float Total
+  +string Estado
+}
+
+class DetalleVenta {
+  +int IdDetalleVenta
+  +int IdVenta_FK
+  +int IdProducto_FK
+  +int Cantidad
+  +float Subtotal
+}
+
+Pedido "1" --> "0..1" Venta : Se_convierte_en
+Empleado "1" --> "0..*" Venta : Registra
+Venta "1" --> "1..*" DetalleVenta : Contiene
+Producto "1" --> "0..*" DetalleVenta : Incluye
