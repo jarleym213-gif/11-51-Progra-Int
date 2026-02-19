@@ -32,15 +32,14 @@
     margin-bottom: 20px;
     margin-top: 1.5em;
    }  
-   #title {
+   
+   .title {
+    font-family: 'Arial', sans-serif;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
     font-size: 1.5em;
     color: #0c0d23;
     text-align: center;
     margin-bottom: 20px;
-   }
-   .title {
-    font-family: 'Arial', sans-serif;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
    }
    .nav-menu ul{
 
@@ -62,6 +61,11 @@
     text-decoration: none;
     font-weight: bold;
    }   
+   .nav-menu ul li a:hover {
+    color: #070744;
+
+    /* Un color más claro al pasar el mouse */
+   }
    .form-group {
     margin-bottom: 15px;
     padding-bottom: 10px;
@@ -77,4 +81,25 @@
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
+   }
+   #video-section {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    border-radius: 10px;
+   }
+   section iframe {
+    border-radius: 10px;
+    display: block;
+    max-width: 100%;
+    width: 560px;
+    height: 315px;
+    border: 5px solid #c3bfd2;
+   }  
+   footer, header {
+    text-align: center;
+    padding: 20px;
+    background-color: #f1f1f1;
+    color: rgb(2, 0, 28);
+    margin-top: 20px;
    }
