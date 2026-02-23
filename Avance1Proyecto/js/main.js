@@ -1,95 +1,38 @@
-// Usuarios
-
-let usuarios = [
-  { correo: "cliente@gmail.com", password: "1234", rol: "cliente" },
-  { correo: "empleado@gmail.com", password: "1234", rol: "empleado" }
-];
-
+// LOGIN SIMPLE
 function login() {
-  let correo = document.getElementById("correo").value;
-  let password = document.getElementById("password").value;
+    let correo = document.getElementById("correo").value;
+    let password = document.getElementById("password").value;
 
-  let usuario = usuarios.find(u => u.correo === correo && u.password === password);
-
-  if (usuario) {
-
-      localStorage.setItem("rol", usuario.rol);
-
-      if (usuario.rol === "cliente") {
-          window.location.href = "index.html";
-      } else if (usuario.rol === "empleado") {
-          window.location.href = "empleado.html";
-      }
-
-  } else {
-      alert("Credenciales incorrectas");
-  }
-}
-
-// Productos
-
-class Producto {
-    constructor(id, nombre, marca, precio, stock) {
-        this.id = id;
-        this.nombre = nombre;
-        this.marca = marca;
-        this.precio = precio;
-        this.stock = stock;
+    if (correo === "admin@gmail.com" && password === "1234") {
+        window.location.href = "index.html";
+    } else {
+        alert("Credenciales incorrectas");
     }
 }
 
-let productos = [
-    new Producto(1, "Mouse Gamer", "Logitech", 12000, 10),
-    new Producto(2, "Teclado Mecánico", "Redragon", 18000, 5),
-    new Producto(3, "Audífonos RGB", "HyperX", 25000, 8)
-];
-
-
-
-// Mostrar productos
-
-if (document.getElementById("productos")) {
-
-    let contenedor = document.getElementById("productos");
-
-    productos.forEach(p => {
-        contenedor.innerHTML += `
-            <div class="card">
-                <h3>${p.nombre}</h3>
-                <p>Marca: ${p.marca}</p>
-                <p>Precio: ₡${p.precio}</p>
-                <button onclick="agregarAlCarrito(${p.id})">
-                    Agregar al carrito
-                </button>
-            </div>
-        `;
-    });
-}
-
-
-// Carrito
-
+// OBTENER CARRITO GUARDADO
 let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+let total = 0;
 
-function agregarAlCarrito(id) {
-    let producto = productos.find(p => p.id === id);
-    carrito.push(producto);
+// AGREGAR PRODUCTO
+function agregarAlCarrito(nombre, precio) {
+
+    carrito.push({nombre, precio});
+
     localStorage.setItem("carrito", JSON.stringify(carrito));
-    alert("Producto agregado");
+
+    alert("Producto agregado al carrito");
 }
 
-
-// Mostrar carrito
-
+// MOSTRAR CARRITO
 if (document.getElementById("listaCarrito")) {
 
     let lista = document.getElementById("listaCarrito");
-    let total = 0;
 
     carrito.forEach(p => {
         lista.innerHTML += `
             <div class="card">
-                <h4>${p.nombre}</h4>
+                <p>${p.nombre}</p>
                 <p>₡${p.precio}</p>
             </div>
         `;
@@ -99,14 +42,8 @@ if (document.getElementById("listaCarrito")) {
     document.getElementById("total").innerText = "Total: ₡" + total;
 }
 
-
-// Finalizar compra y cerrar sesión
+// FINALIZAR COMPRA
 function finalizarCompra() {
-    alert("Pedido generado con estado: Pendiente");
+    alert("Compra realizada con éxito");
     localStorage.removeItem("carrito");
-    window.location.href = "index.html";
-}
-function cerrarSesion() {
-    localStorage.clear();
-    window.location.href = "login.html";
 }

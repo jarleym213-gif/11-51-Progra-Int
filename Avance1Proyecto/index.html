@@ -5,19 +5,39 @@
     <link rel="stylesheet" href="css/estilos.css">
 </head>
 <body>
+
 <header>
-    <h1  id="main-title" class="title">Tienda de Accesorios-PC</h1>
-    <h2 id="title">JAR</h2>
-  </header>
+    <h1 id="main-title">Tienda de Accesorios PC</h1>
+    <h2>JAR</h2>
+</header>
+
 <nav class="nav-menu">
-    <ul class="nav-list">
-      <li class="menu-item"><a href="index.html">Inicio</a></li>
-      <li class="menu-item"><a href="#">Contacto</a></li>
-      <li class="menu-item"><a href="#">Ayuda</a></li>
-      <li class="menu-item"><a href="carrito.html">Ver Carrito</a></li>
+    <ul>
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="carrito.html">Ver Carrito</a></li>
+        <li><a href="login.html">Cerrar Sesión</a></li>
     </ul>
-  </nav>
-<div id="productos"></div>
+</nav>
+
+<h2>Productos</h2>
+
+<div class="card">
+    <h3>Mouse Gamer</h3>
+    <p>Precio: ₡12000</p>
+    <button onclick="agregarAlCarrito('Mouse Gamer', 12000)">Agregar</button>
+</div>
+
+<div class="card">
+    <h3>Teclado Mecánico</h3>
+    <p>Precio: ₡18000</p>
+    <button onclick="agregarAlCarrito('Teclado Mecánico', 18000)">Agregar</button>
+</div>
+
+<div class="card">
+    <h3>Audífonos RGB</h3>
+    <p>Precio: ₡25000</p>
+    <button onclick="agregarAlCarrito('Audífonos RGB', 25000)">Agregar</button>
+</div>
 
 <script src="js/main.js"></script>
 </body>
