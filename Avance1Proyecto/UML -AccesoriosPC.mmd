@@ -1,9 +1,8 @@
 classDiagram
 direction LR
 
-%% =========================
-%% USUARIO BASE
-%% =========================
+
+%% USUARIO
 class Usuario {
   +int IdUsuario
   +string Nombre
@@ -28,9 +27,8 @@ Usuario <|-- Cliente
 Usuario <|-- Empleado
 
 
-%% =========================
+
 %% CATEGORIA Y PRODUCTO
-%% =========================
 class Categoria {
   +int IdCategoria
   +string Nombre
@@ -54,9 +52,8 @@ class Producto {
 Producto "0..*" --> "1" Categoria : Pertenece_a
 
 
-%% =========================
+
 %% CARRITO
-%% =========================
 class Carrito {
   +int IdCarrito
   +int IdCliente_FK
@@ -75,9 +72,8 @@ Carrito "1" --> "1..*" DetalleCarrito : Contiene
 Producto "1" --> "0..*" DetalleCarrito : Agregado
 
 
-%% =========================
+
 %% PEDIDOS
-%% =========================
 class Pedido {
   +int IdPedido
   +int IdCliente_FK
@@ -99,9 +95,8 @@ Pedido "1" --> "1..*" DetallePedido : Contiene
 Producto "1" --> "0..*" DetallePedido : Incluye
 
 
-%% =========================
+
 %% VENTAS
-%% =========================
 class Venta {
   +int IdVenta
   +int IdPedido_FK
