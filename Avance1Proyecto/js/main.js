@@ -8,19 +8,3 @@ function login() {
     }
 }
 
-function agregarAlCarrito(nombre, precio) {
-    let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
-    carrito.push({
-        nombre: nombre,
-        precio: precio
-    });
-    localStorage.setItem("carrito", JSON.stringify(carrito));
-    alert("Producto agregado al carrito");
-}
-
-function finalizarCompra() {
-    localStorage.removeItem("carrito");
-    alert("Compra realizada");
-    window.location.reload();
-}
-
