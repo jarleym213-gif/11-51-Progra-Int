@@ -185,3 +185,32 @@ tbody tr:nth-child(even) {
   font-weight: 800;
   font-size: 12px;
 }
+.btnEliminar {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-weight: 800;
+  font-size: 12px;
+  background: var(--accent2);
+  color: #fff;
+} 
+.btnActualizar {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-weight: 800;
+  font-size: 12px;
+  background: var(--accent);
+  color: #05323A;
+}
+.field.buttons{
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: flex-end;
+  gap: 10px;
+}
+/*
+DRY (Don't Repeat Yourself) - Evitar la repetición de código es una buena práctica en programación. En este caso, las clases `.btnEliminar` y `.btnActualizar` comparten muchas propiedades CSS similares. Para evitar la repetición, podríamos crear una clase base para los botones y luego extenderla para cada tipo específico. Aquí hay un ejemplo de cómo podríamos hacerlo:
+*/
