@@ -1,16 +1,17 @@
 classDiagram
 direction LR
 
-%% USUARIO
+
 class Usuario {
   +int IdUsuario
   +string Nombre
   +string Correo
   +string Telefono
-  +string Contrasena
   +string Rol
   +bool Activo
 }
+Usuario ..> auth.users : Vinculado
+note for Usuario "Autenticación manejada por Supabase (auth.users)"
 
 
 
@@ -37,7 +38,6 @@ class Producto {
 Categoria "1" --> "0..*" Producto : Clasifica
 
 
-
 %% CARRITO
 class Carrito {
   +int IdCarrito
@@ -56,7 +56,6 @@ class DetalleCarrito {
 Usuario "1" --> "0..1" Carrito : Tiene
 Carrito "1" --> "1..*" DetalleCarrito : Contiene
 Producto "1" --> "0..*" DetalleCarrito : Agregado
-
 
 
 %% VENTA
