@@ -1,0 +1,8 @@
+admin@gmail.com
+12345
+
+vendedor@gmail.com
+12345
+
+comprador@email.com
+1234
