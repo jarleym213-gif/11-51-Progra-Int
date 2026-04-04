@@ -14,7 +14,12 @@
 <body>
 
     <header class="bg-primary text-white text-center p-3">
-        <h1 id="main-title">Tienda Virtual JAR</h1>
+        <h1 id="main-title">Tienda Tech JAR</h1>
+        <nav class="login-menu">
+            <ul class="nav-list">
+                <li><span id="usuarioLogueado"></span></li>
+            </ul>
+        </nav>
     </header>
 
 
@@ -22,36 +27,34 @@
         <ul class="nav-list">
             <li><a href="index.html">Inicio</a></li>
             <li><a href="productos.html">Productos</a></li>
-            <li><a href="clientes.html">Clientes</a></li>
-            <li><a href="empleados.html">Empleados</a></li>
-            <li><a href="login.html">Cerrar Sesión</a></li>
+            <li id="menuClientes"><a href="clientes.html">Clientes</a></li>
+            <li id="menuEmpleados"><a href="empleados.html">Empleados</a></li>
+            <li><a href="contacto.html">Contacto</a></li>
+            <li><a href="#" onclick="logout()">Cerrar Sesión</a></li>
         </ul>
     </nav>
 
     <main class="container mt-4">
-        <section class="text-center">
-            <h2 id="title" class="title">Bienvenido</h2>
-            <p>Proyecto Programación en Internet. En desarrollo...</p>
-        </section>
+        
+        <section class="hero">
+  <div class="hero-content">
+    <h1>Bienvenido a tu Tienda Tech JAR</h1>
+    <p>Los mejores accesorios de PC al mejor precio</p>
+    <a href="productos.html" class="btn btn-primary btn-lg mt-3">
+      Comprar ahora
+    </a>
+  </div>
+</section>
     </main>
     <footer>
         <p>&copy; 2026 Tienda de accesorios de PC</p>
         <p>Contacto: <a href="mailto:jarley@gmail.com">Jarley</a></p>
+        <p id="usuarioLogueado"></p>
     </footer>
-    <script type="module">
-
-        import { supabase } from "./supabase.js";
-
-        const { data } = await supabase.auth.getUser();
-
-        if (!data.user) {
-
-            window.location.href = "login.html";
-
-        }
-
-    </script>
-     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+     <script type="module" src="./js/apps.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="./js/auth.js"></script>
 </body>
 
 </html>

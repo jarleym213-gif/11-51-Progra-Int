@@ -2,9 +2,9 @@
 // este cliente ya está configurado con la URL y la clave de acceso a nuestra instancia de Supabase
 import { supabase } from "./supabase.js";
 
-//****************************************
+
 // Referencias a elementos del DOM
-//****************************************
+
 // Botones
 const btnClear = document.getElementById("btnClear");
 const btnAdd = document.getElementById("btnAdd");
@@ -94,9 +94,9 @@ tbody.addEventListener("click", async (event) => {
 // var z = 60; // no error, var permite redeclarar la misma variable
 */
 
-//****************************************
+
 //Funciones
-//****************************************
+
 const consultarEstudiantes = async () => {
   // usamos el cliente de Supabase para hacer una consulta a la tabla "estudiantes"
   // json: { "data": [], "error": null }

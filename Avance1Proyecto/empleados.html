@@ -13,18 +13,24 @@
 <body>
     <header class="bg-success text-white text-center p-3">
         <h1>Empleados</h1>
+        <nav class="login-menu">
+            <ul class="nav-list">
+                <li><span id="usuarioLogueado"></span></li>
+            </ul>
+        </nav>
     </header>
     <nav class="nav-menu">
         <ul class="nav-list">
             <li><a href="index.html">Inicio</a></li>
             <li><a href="productos.html">Productos</a></li>
-            <li><a href="clientes.html">Clientes</a></li>
-            <li><a href="empleados.html">Empleados</a></li>
-            <li><a href="login.html">Cerrar sesión</a></li>
+            <li id="menuClientes"><a href="clientes.html">Clientes</a></li>
+            <li id="menuEmpleados"><a href="empleados.html">Empleados</a></li>
+            <li><a href="contacto.html">Contacto</a></li>
+            <li><a href="#" onclick="logout()">Cerrar Sesión</a></li>
         </ul>
     </nav>
     <main class="container mt-4">
-        <h2>Agregar Empleado</h2>
+        <h2 id="tituloForm">Agregar Empleado</h2>
         <input type="hidden" id="txtId">
         <div class="row g-2 mb-4">
             <div class="col-md-4">
@@ -37,9 +43,10 @@
                 <input type="text" id="txtPuesto" class="form-control" placeholder="Puesto">
             </div>
             <div class="col-md-2">
-                <button id="btnAdd" class="btn btn-success w-100">
+                <button id="btnAdd" class="btn btn-success w-10">
                     Guardar
                 </button>
+                <button id="btnCancel" class="btn btn-success" type="button">Cancelar</button>
             </div>
         </div>
 
@@ -69,7 +76,8 @@
         <p>Contacto: <a href="mailto:jarley@gmail.com">Jarley</a></p>
     </footer>
     <script src="./js/empleados.js" type="module"></script>
-     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="./js/auth.js"></script>
 </body>
 
 </html>

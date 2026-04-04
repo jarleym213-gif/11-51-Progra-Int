@@ -1,21 +1,25 @@
 classDiagram
 direction LR
 
-
+%% Usuario vinculado a autenticación de Supabase
 class Usuario {
-  +int IdUsuario
+  +uuid IdUsuario
+  +string Correo
+  +string Rol
+}
+
+Usuario ..> auth.users : Vinculado
+note for Usuario "Autenticación manejada por Supabase"
+
+%% Cliente vinculado a Usuario
+class Cliente {
+  +int IdCliente
   +string Nombre
   +string Correo
   +string Telefono
-  +string Rol
-  +bool Activo
 }
-Usuario ..> auth.users : Vinculado
-note for Usuario "Autenticación manejada por Supabase (auth.users)"
 
-
-
-%% CATEGORIA Y PRODUCTO
+%% Categoría y Producto
 class Categoria {
   +int IdCategoria
   +string Nombre
@@ -28,43 +32,37 @@ class Producto {
   +int IdCategoria_FK
   +string Nombre
   +string Marca
-  +string Modelo
   +float Precio
   +int Stock
-  +int GarantiaMeses
   +bool Activo
 }
 
 Categoria "1" --> "0..*" Producto : Clasifica
 
-
-%% CARRITO
+%% Productos en Carrito y Ventas
 class Carrito {
   +int IdCarrito
   +int IdUsuario_FK
-  +date FechaCreacion
 }
 
 class DetalleCarrito {
   +int IdDetalleCarrito
-  +int IdCarrito_FK
   +int IdProducto_FK
   +int Cantidad
-  +float Subtotal
+  +float Precio
 }
 
 Usuario "1" --> "0..1" Carrito : Tiene
 Carrito "1" --> "1..*" DetalleCarrito : Contiene
 Producto "1" --> "0..*" DetalleCarrito : Agregado
 
-
-%% VENTA
+%% Ventas y Detalles de Venta
 class Venta {
   +int IdVenta
-  +int IdUsuario_FK
+  +uuid IdUsuario_FK
+  +int IdCliente_FK
   +date Fecha
   +float Total
-  +string Estado
 }
 
 class DetalleVenta {
@@ -72,10 +70,10 @@ class DetalleVenta {
   +int IdVenta_FK
   +int IdProducto_FK
   +int Cantidad
-  +float PrecioUnitario
-  +float Subtotal
+  +float Precio
 }
 
-Usuario "1" --> "0..*" Venta : Realiza
+Usuario "1" --> "0..*" Venta : Registra
+Cliente "1" --> "0..*" Venta : Compra
 Venta "1" --> "1..*" DetalleVenta : Contiene
-Producto "1" --> "0..*" DetalleVenta : Incluye
+Producto "1" --> "0..*" DetalleVenta : Vendido

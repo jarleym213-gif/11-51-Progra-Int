@@ -1,11 +1,15 @@
 import { supabase } from "./supabase.js";
 
-// Referencias DOM
+// ================================
+// REFERENCIAS DOM
+// ================================
 const btnLogin = document.getElementById("btnLogin");
 const txtCorreo = document.getElementById("correo");
 const txtPassword = document.getElementById("password");
 
-// Funciones
+// ================================
+// FUNCIONES
+// ================================
 const login = async () => {
 
   const correo = txtCorreo.value.trim();
@@ -16,6 +20,7 @@ const login = async () => {
     return;
   }
 
+  // 🔐 LOGIN SUPABASE
   const { data, error } = await supabase.auth.signInWithPassword({
     email: correo,
     password: password
@@ -27,12 +32,44 @@ const login = async () => {
     return;
   }
 
-  Swal.fire("Bienvenido");
+  // 🔥 TRAER ROL DESDE TU TABLA USUARIOS
+  const { data: usuarioDB, error: errorRol } = await supabase
+    .from("usuarios")
+    .select("rol")
+    .eq("correo", correo)
+    .maybeSingle();
+
+  if (errorRol) {
+    console.error(errorRol);
+    Swal.fire("Error obteniendo rol");
+    return;
+  }
+  if (errorRol) {
+  console.error(errorRol);
+  Swal.fire("Error obteniendo rol");
+  return;
+}
+
+// 🔥 SI NO EXISTE → asumir vendedor
+const rol = usuarioDB?.rol || "vendedor";
+
+  // 🔥 GUARDAR TODO EL USUARIO + ROL
+  const usuarioCompleto = {
+  id: data.user.id,
+  email: data.user.email,
+  rol: rol
+};
+
+localStorage.setItem("usuario", JSON.stringify(usuarioCompleto));
+
+  Swal.fire("Bienvenido " + usuarioDB.rol);
 
   window.location.href = "index.html";
 };
 
-//Eventos
+// ================================
+// EVENTOS
+// ================================
 if (btnLogin) {
   btnLogin.addEventListener("click", login);
 }

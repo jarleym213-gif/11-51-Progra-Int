@@ -4,13 +4,17 @@ import { supabase } from "./supabase.js";
 const tbody = document.getElementById("tbodyEmpleados");
 const btnLoad = document.getElementById("btnLoad");
 const btnAdd = document.getElementById("btnAdd");
+const btnCancel = document.getElementById("btnCancel");
+
 
 const txtId = document.getElementById("txtId");
 const txtNombre = document.getElementById("txtNombre");
 const txtCorreo = document.getElementById("txtCorreo");
 const txtPuesto = document.getElementById("txtPuesto");
+const tituloForm = document.getElementById("tituloForm");
 
 // FUNCIONES
+let rolUsuario = "";
 
 // CONSULTAR
 const consultarEmpleados = async () => {
@@ -30,6 +34,17 @@ const consultarEmpleados = async () => {
 
   data.forEach((e) => {
 
+    const botonesAdmin = rolUsuario === "admin"
+      ? `
+        <button class="btnEditar btn btn-warning btn-sm" data-id="${e.id}">
+          Editar
+        </button>
+        <button class="btnEliminar btn btn-danger btn-sm" data-id="${e.id}">
+          Eliminar
+        </button>
+      `
+      : "";
+
     const tr = document.createElement("tr");
 
     tr.innerHTML = `
@@ -37,14 +52,7 @@ const consultarEmpleados = async () => {
       <td>${e.nombre}</td>
       <td>${e.correo}</td>
       <td>${e.cargo}</td>
-      <td>
-        <button class="btnEditar btn btn-warning btn-sm" data-id="${e.id}">
-          Editar
-        </button>
-        <button class="btnEliminar btn btn-danger btn-sm" data-id="${e.id}">
-          Eliminar
-        </button>
-      </td>
+      <td>${botonesAdmin}</td>
     `;
 
     tbody.appendChild(tr);
@@ -103,7 +111,7 @@ const guardarEmpleado = async () => {
 
 // ELIMINAR
 const eliminarEmpleado = async (id) => {
-
+  if (rolUsuario !== "admin") return;
   if (!confirm("¿Eliminar empleado?")) return;
 
   const { error } = await supabase
@@ -126,12 +134,15 @@ const limpiarFormulario = () => {
   txtNombre.value = "";
   txtCorreo.value = "";
   txtPuesto.value = "";
+   btnAdd.textContent = "Guardar";
+  tituloForm.textContent = "Agregar Empleado";
 };
 
 // EVENTOS
 
 if (btnLoad) btnLoad.addEventListener("click", consultarEmpleados);
 if (btnAdd) btnAdd.addEventListener("click", guardarEmpleado);
+if (btnCancel) btnCancel.addEventListener("click", limpiarFormulario);
 
 // DELEGACIÓN
 tbody.addEventListener("click", async (event) => {
@@ -163,11 +174,53 @@ tbody.addEventListener("click", async (event) => {
     txtNombre.value = data.nombre;
     txtCorreo.value = data.correo;
     txtPuesto.value = data.cargo;
+      btnAdd.textContent = "Actualizar";
+    tituloForm.textContent = "Editar Empleado";
   }
 
 });
 
 // INICIALIZACIÓN
-window.onload = () => {
-  consultarEmpleados();
+window.onload = async () => {
+  await obtenerRol();
+
+  console.log("Rol detectado:", rolUsuario);
+
+  // 🔥 OCULTAR MENÚ SI ES COMPRADOR
+  if (rolUsuario === "comprador") {
+    const menuClientes = document.getElementById("menuClientes");
+    const menuEmpleados = document.getElementById("menuEmpleados");
+
+    if (menuClientes) menuClientes.style.display = "none";
+    if (menuEmpleados) menuEmpleados.style.display = "none";
+  }
+
+  await consultarEmpleados();
+};
+
+
+// OBTENER ROL USUARIO
+const obtenerRol = async () => {
+  const { data: userData } = await supabase.auth.getUser();
+
+  if (!userData?.user) {
+    window.location.href = "login.html";
+    return;
+  }
+
+  const { data, error } = await supabase
+    .from("usuarios")
+    .select("rol")
+    .eq("correo", userData.user.email)
+    .maybeSingle();
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  rolUsuario = (data?.rol || "vendedor").trim().toLowerCase();
+
+  console.log("EMAIL:", userData.user.email);
+  console.log("ROL BD:", data);
 };

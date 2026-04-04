@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Clientes</title>
+    <title >Clientes</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -13,18 +13,24 @@
 <body>
     <header class="bg-success text-white text-center p-3">
         <h1>Clientes</h1>
+         <nav class="login-menu">
+        <ul class="nav-list">
+            <li><span id="usuarioLogueado"></span></li>
+        </ul>
+    </nav>
     </header>
     <nav class="nav-menu">
         <ul class="nav-list">
             <li><a href="index.html">Inicio</a></li>
             <li><a href="productos.html">Productos</a></li>
-            <li><a href="clientes.html">Clientes</a></li>
-            <li><a href="empleados.html">Empleados</a></li>
-            <li><a href="login.html">Cerrar sesión</a></li>
+            <li id="menuClientes"><a href="clientes.html">Clientes</a></li>
+            <li id="menuEmpleados"><a href="empleados.html">Empleados</a></li>
+            <li><a href="contacto.html">Contacto</a></li>
+             <li><a href="#" onclick="logout()">Cerrar Sesión</a></li>
         </ul>
     </nav>
     <main class="container mt-4">
-        <h2>Agregar Cliente</h2>
+        <h2 id="tituloForm">Agregar Cliente</h2>
         <input type="hidden" id="txtId">
         <div class="row g-2 mb-4">
             <div class="col-md-4">
@@ -37,9 +43,10 @@
                 <input type="text" id="txtTelefono" class="form-control" placeholder="Teléfono">
             </div>
             <div class="col-md-2">
-                <button id="btnAdd" class="btn btn-success w-100">
+                <button id="btnAdd" class="btn btn-success w-10">
                     Guardar
                 </button>
+                 <button id="btnCancel" class="btn btn-success" type="button">Cancelar</button>
             </div>
         </div>
 
@@ -69,6 +76,7 @@
     </footer>
      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="./js/clientes.js" type="module"></script>
+    <script src="./js/auth.js"></script>
 
 </body>
 

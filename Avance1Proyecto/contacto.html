@@ -15,15 +15,21 @@
 
     <header class="bg-dark text-white text-center p-3">
         <h1>Contacto</h1>
+         <nav class="login-menu">
+        <ul class="nav-list">
+            <li><span id="usuarioLogueado"></span></li>
+        </ul>
+    </nav>
     </header>
 
     <nav class="nav-menu">
         <ul class="nav-list">
             <li><a href="index.html">Inicio</a></li>
             <li><a href="productos.html">Productos</a></li>
-            <li><a href="clientes.html">Clientes</a></li>
-            <li><a href="empleados.html">Empleados</a></li>
-            <li><a href="login.html">Cerrar Sesión</a></li>
+            <li id="menuClientes"><a href="clientes.html">Clientes</a></li>
+            <li id="menuEmpleados"><a href="empleados.html">Empleados</a></li>
+            <li id="menuContacto"><a href="contacto.html">Contacto</a></li>
+             <li><a href="#" onclick="logout()">Cerrar Sesión</a></li>
         </ul>
     </nav>
     <main class="container mt-4">
@@ -64,6 +70,7 @@
     <footer>
         <p>&copy; 2026 Tienda de accesorios de PC</p>
         <p>Contacto: <a href="mailto:jarley@gmail.com">Jarley</a></p>
+        <script src="./js/auth.js"></script>
     </footer>
 </body>
 

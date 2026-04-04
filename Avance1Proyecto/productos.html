@@ -8,6 +8,7 @@
 
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="/css/estilos.css">
 </head>
 
@@ -15,22 +16,28 @@
 
     <header class="bg-success text-white text-center p-3">
         <h1>Productos</h1>
+        <nav class="login-menu">
+            <ul class="nav-list">
+                <li><span id="usuarioLogueado"></span></li>
+            </ul>
+        </nav>
     </header>
 
     <nav class="nav-menu">
         <ul class="nav-list">
             <li><a href="index.html">Inicio</a></li>
             <li><a href="productos.html">Productos</a></li>
-            <li><a href="clientes.html">Clientes</a></li>
-            <li><a href="empleados.html">Empleados</a></li>
+            <li id="menuClientes"><a href="clientes.html">Clientes</a></li>
+            <li id="menuEmpleados"><a href="empleados.html">Empleados</a></li>
             <li><a href="carrito.html">Carrito</a></li>
-            <li><a href="login.html">Cerrar Sesión</a></li>
+            <li><a href="contacto.html">Contacto</a></li>
+            <li><a href="#" onclick="logout()">Cerrar Sesión</a></li>
         </ul>
     </nav>
 
     <main class="container mt-4">
-
-        <h2>Agregar / Editar Producto</h2>
+        <section id="interno">   
+        <h2 id="tituloForm">Agregar Producto</h2>
         <input type="hidden" id="txtId">
         <div class="row g-2 mb-3">
             <div class="col-md-3">
@@ -45,12 +52,16 @@
             <div class="col-md-2">
                 <input type="number" id="txtStock" class="form-control" placeholder="Stock">
             </div>
-            <div class="col-md-2">
-                <button id="btnAdd" class="btn btn-success w-100">
+            <div class="text-center mt-3">
+                <i class="bi ${icono}" style="font-size:60px;"></i>
+            </div>
+            <div class="field buttons">
+                <button id="btnAdd" class="btn btn-success w-10">
                     Guardar
                 </button>
+                <button id="btnCancel" class="btn btn-success" type="button">Cancelar</button>
             </div>
-        </div>
+        </div></section>
 
         <section>
             <h2 class="mb-3">Lista de Productos</h2>
@@ -59,7 +70,7 @@
                 Refrescar Productos
             </button>
 
-            <table class="table table-striped table-bordered">
+            <table id="tablaProductos" class="table table-striped table-bordered">
                 <thead class="table-dark">
                     <tr>
                         <th>ID</th>
@@ -71,7 +82,7 @@
                     </tr>
                 </thead>
 
-                <tbody id="tbodyProductos"></tbody>
+                <div id="contenedorProductos" class="row"></div>
 
             </table>
         </section>
@@ -83,7 +94,8 @@
     </footer>
 
     <script type="module" src="./js/apps.js"></script>
-     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="./js/auth.js"></script>
 </body>
 
 </html>
