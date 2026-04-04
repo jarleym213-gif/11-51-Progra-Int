@@ -201,7 +201,7 @@ footer {
 .hero {
   background-image: 
     linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
-    url('../images/store.jpg');
+    url('/images/store.jpg');
 
   width: 100%;
   min-height: 60vh;
