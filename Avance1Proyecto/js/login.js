@@ -20,7 +20,7 @@ const login = async () => {
     return;
   }
 
-  // 🔐 LOGIN SUPABASE
+  //  LOGIN SUPABASE
   const { data, error } = await supabase.auth.signInWithPassword({
     email: correo,
     password: password
@@ -32,7 +32,7 @@ const login = async () => {
     return;
   }
 
-  // 🔥 TRAER ROL DESDE TU TABLA USUARIOS
+  //  TRAER ROL DESDE TU TABLA USUARIOS
   const { data: usuarioDB, error: errorRol } = await supabase
     .from("usuarios")
     .select("rol")
@@ -50,10 +50,10 @@ const login = async () => {
   return;
 }
 
-// 🔥 SI NO EXISTE → asumir vendedor
+//  SI NO EXISTE → asumir vendedor
 const rol = usuarioDB?.rol || "vendedor";
 
-  // 🔥 GUARDAR TODO EL USUARIO + ROL
+  // GUARDAR TODO EL USUARIO + ROL
   const usuarioCompleto = {
   id: data.user.id,
   email: data.user.email,
