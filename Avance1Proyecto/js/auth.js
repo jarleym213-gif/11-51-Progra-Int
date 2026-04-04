@@ -1,11 +1,7 @@
-// ================================
-// OBTENER USUARIO
-// ================================
+// Obtenemos el usuario 
 const user = JSON.parse(localStorage.getItem("usuario"));
 
-// ================================
-// VALIDAR SESIÓN
-// ================================
+//Validamos si el usuario está logueado o no
 if (!user) {
   // si NO está logueado → lo manda al login
   if (!window.location.href.includes("login.html")) {
@@ -13,9 +9,7 @@ if (!user) {
   }
 }
 
-// ================================
-// MOSTRAR USUARIO
-// ================================
+// Mostramos el email del usuario logueado en el header
 const usuarioLogueado = document.getElementById("usuarioLogueado");
 
 if (user && usuarioLogueado) {
@@ -23,9 +17,7 @@ if (user && usuarioLogueado) {
 }
 
 
-// ================================
-// LOGOUT
-// ================================
+// Logout: 
 window.logout = () => {
   localStorage.removeItem("usuario");
   window.location.href = "login.html";

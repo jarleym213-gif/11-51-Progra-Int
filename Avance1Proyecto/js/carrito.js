@@ -10,9 +10,7 @@ const selectCliente = document.getElementById("selectCliente");
 let clienteAutoId = null;
 let rolUsuario = "";
 
-// ================================
-// OBTENER CLIENTE AUTOMÁTICO
-// ================================
+// OBTENER CLIENTE AUTOMÁTICO (TIENDA ONLINE)
 const obtenerClienteAutomatico = async (email) => {
 
   const { data, error } = await supabase
@@ -29,9 +27,7 @@ const obtenerClienteAutomatico = async (email) => {
   return data;
 };
 
-// ================================
-// CARGAR CLIENTES (ADMIN/VENDEDOR)
-// ================================
+// Cargar clientes (ADMIN/VENDEDOR)
 const cargarClientes = async () => {
 
   const { data, error } = await supabase
@@ -55,9 +51,7 @@ const cargarClientes = async () => {
 
 };
 
-// ================================
-// CARGAR CARRITO
-// ================================
+// Cargar carrito
 const cargarCarrito = async () => {
 
   const { data, error } = await supabase
@@ -101,9 +95,7 @@ const cargarCarrito = async () => {
   totalText.innerText = "₡" + total;
 };
 
-// ================================
-// ELIMINAR PRODUCTO
-// ================================
+// Eliminar producto del carrito
 const eliminarProducto = async (id) => {
 
   const { error } = await supabase
@@ -120,9 +112,7 @@ const eliminarProducto = async (id) => {
 
 };
 
-// ================================
-// FINALIZAR COMPRA
-// ================================
+// Finalizar compra
 const finalizarCompra = async () => {
 
   // usuario logueado
@@ -137,7 +127,7 @@ const finalizarCompra = async () => {
   const usuarioId = userData.user.id;
   const email = userData.user.email;
 
-  // 🔥 determinar cliente
+  //determinar cliente
   let clienteId;
 
   if (email === "comprador@email.com") {
@@ -210,9 +200,7 @@ const finalizarCompra = async () => {
   // limpiar carrito
   await supabase.from("carrito").delete().neq("id", 0);
 
-  // ================================
-  // FACTURA VISUAL
-  // ================================
+  // Factura
   let detalle = "";
   let totalFinal = 0;
 
@@ -253,9 +241,7 @@ const finalizarCompra = async () => {
   cargarCarrito();
 };
 
-// ================================
 // EVENTOS
-// ================================
 tbody.addEventListener("click", async (e) => {
   if (e.target.classList.contains("btnEliminar")) {
     const id = e.target.getAttribute("data-id");
@@ -267,9 +253,7 @@ if (btnFinalizar) {
   btnFinalizar.addEventListener("click", finalizarCompra);
 }
 
-// ================================
 // INICIO
-// ================================
 window.onload = async () => {
 
   await cargarCarrito();

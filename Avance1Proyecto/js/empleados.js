@@ -186,7 +186,7 @@ window.onload = async () => {
 
   console.log("Rol detectado:", rolUsuario);
 
-  // 🔥 OCULTAR MENÚ SI ES COMPRADOR
+  // OCULTAR MENÚ SI ES COMPRADOR
   if (rolUsuario === "comprador") {
     const menuClientes = document.getElementById("menuClientes");
     const menuEmpleados = document.getElementById("menuEmpleados");

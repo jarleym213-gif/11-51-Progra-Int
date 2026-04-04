@@ -1,15 +1,11 @@
 import { supabase } from "./supabase.js";
 
-// ================================
 // REFERENCIAS DOM
-// ================================
 const btnLogin = document.getElementById("btnLogin");
 const txtCorreo = document.getElementById("correo");
 const txtPassword = document.getElementById("password");
 
-// ================================
 // FUNCIONES
-// ================================
 const login = async () => {
 
   const correo = txtCorreo.value.trim();
@@ -67,9 +63,7 @@ localStorage.setItem("usuario", JSON.stringify(usuarioCompleto));
   window.location.href = "index.html";
 };
 
-// ================================
-// EVENTOS
-// ================================
+// Eventos
 if (btnLogin) {
   btnLogin.addEventListener("click", login);
 }
