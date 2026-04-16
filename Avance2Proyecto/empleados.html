@@ -23,8 +23,8 @@
         <ul class="nav-list">
             <li><a href="index.html">Inicio</a></li>
             <li><a href="productos.html">Productos</a></li>
-            <li id="menuClientes"><a href="clientes.html">Clientes</a></li>
-            <li id="menuEmpleados"><a href="empleados.html">Empleados</a></li>
+            <li id="menuClientes" style="display:none;"><a href="clientes.html">Clientes</a></li>
+            <li id="menuEmpleados" style="display:none;"><a href="empleados.html">Empleados</a></li>
             <li><a href="contacto.html">Contacto</a></li>
             <li><a href="#" onclick="logout()">Cerrar Sesión</a></li>
         </ul>
@@ -34,13 +34,21 @@
         <input type="hidden" id="txtId">
         <div class="row g-2 mb-4">
             <div class="col-md-4">
-                <input type="text" id="txtNombre" class="form-control" placeholder="Nombre">
+                <input type="text" id="txtNombre" class="form-control" placeholder="Nombre completo">
             </div>
             <div class="col-md-4">
                 <input type="email" id="txtCorreo" class="form-control" placeholder="Correo">
             </div>
+            
             <div class="col-md-2">
-                <input type="text" id="txtPuesto" class="form-control" placeholder="Puesto">
+                <input type="password" id="txtPassword" class="form-control" placeholder="Contraseña">
+            </div>
+            <div class="col-md-2">
+                <select id="txtRol" class="form-control">
+                    <option value="vendedor">Vendedor</option>
+                    <option value="admin">Administrador</option>
+
+                </select>
             </div>
             <div class="col-md-2">
                 <button id="btnAdd" class="btn btn-success w-10">

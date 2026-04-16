@@ -5,14 +5,26 @@ const tbody = document.getElementById("tbodyCarrito");
 const totalText = document.getElementById("total");
 const btnFinalizar = document.getElementById("btnFinalizar");
 const selectCliente = document.getElementById("selectCliente");
+const labelCliente = document.getElementById("clienteSeleccionado");
 
-// VARIABLE GLOBAL
+// VARIABLES GLOBALES
 let clienteAutoId = null;
 let rolUsuario = "";
 
-// OBTENER CLIENTE AUTOMÁTICO (TIENDA ONLINE)
-const obtenerClienteAutomatico = async (email) => {
+// OBTENER USUARIO LOGUEADO
+const obtenerUsuario = async () => {
+  const { data } = await supabase.auth.getUser();
 
+  if (!data?.user) {
+    window.location.href = "login.html";
+    return null;
+  }
+
+  return data.user;
+};
+
+// OBTENER CLIENTE AUTOMÁTICO
+const obtenerClienteAutomatico = async (email) => {
   const { data, error } = await supabase
     .from("clientes")
     .select("id,nombre")
@@ -27,9 +39,8 @@ const obtenerClienteAutomatico = async (email) => {
   return data;
 };
 
-// Cargar clientes (ADMIN/VENDEDOR)
+// CARGAR CLIENTES (ADMIN/VENDEDOR)
 const cargarClientes = async () => {
-
   const { data, error } = await supabase
     .from("clientes")
     .select("id,nombre");
@@ -48,15 +59,17 @@ const cargarClientes = async () => {
     option.textContent = c.nombre;
     selectCliente.appendChild(option);
   });
-
 };
 
-// Cargar carrito
+// CARGAR CARRITO
 const cargarCarrito = async () => {
+  const user = await obtenerUsuario();
+  if (!user) return;
 
   const { data, error } = await supabase
     .from("carrito")
-    .select("*");
+    .select("*")
+    .eq("usuario_id", user.id);
 
   if (error) {
     console.error(error);
@@ -68,7 +81,6 @@ const cargarCarrito = async () => {
   let total = 0;
 
   data.forEach((p) => {
-
     const subtotal = p.precio * p.cantidad;
     total += subtotal;
 
@@ -81,56 +93,42 @@ const cargarCarrito = async () => {
       <td>${p.cantidad}</td>
       <td>₡${subtotal}</td>
       <td>
-        <button class="btn btn-danger btn-sm btnEliminar"
-          data-id="${p.id}">
+        <button class="btn btn-danger btn-sm btnEliminar" data-id="${p.id}">
           Eliminar
         </button>
       </td>
     `;
 
     tbody.appendChild(tr);
-
   });
 
   totalText.innerText = "₡" + total;
 };
 
-// Eliminar producto del carrito
+// ELIMINAR
 const eliminarProducto = async (id) => {
-
   const { error } = await supabase
     .from("carrito")
     .delete()
     .eq("id", id);
 
   if (error) {
-    console.error(error);
     Swal.fire("Error eliminando");
   } else {
     cargarCarrito();
   }
-
 };
 
-// Finalizar compra
+// FINALIZAR COMPRA
 const finalizarCompra = async () => {
+  const user = await obtenerUsuario();
+  if (!user) return;
 
-  // usuario logueado
-  const { data: userData } = await supabase.auth.getUser();
+  const usuarioId = user.id;
 
-  if (!userData?.user) {
-    Swal.fire("Debe iniciar sesión");
-    window.location.href = "login.html";
-    return;
-  }
-
-  const usuarioId = userData.user.id;
-  const email = userData.user.email;
-
-  //determinar cliente
   let clienteId;
 
-  if (email === "comprador@email.com") {
+  if (rolUsuario  === "comprador") {
     clienteId = clienteAutoId;
   } else {
     clienteId = selectCliente.value;
@@ -141,12 +139,12 @@ const finalizarCompra = async () => {
     return;
   }
 
-  // carrito
-  const { data: carrito, error } = await supabase
+  const { data: carrito } = await supabase
     .from("carrito")
-    .select("*");
+    .select("*")
+    .eq("usuario_id", usuarioId);
 
-  if (error || carrito.length === 0) {
+  if (!carrito || carrito.length === 0) {
     Swal.fire("Carrito vacío");
     return;
   }
@@ -154,8 +152,7 @@ const finalizarCompra = async () => {
   let total = 0;
   carrito.forEach(p => total += p.precio * p.cantidad);
 
-  // CREAR VENTA
-  const { data: venta, error: errorVenta } = await supabase
+  const { data: venta } = await supabase
     .from("ventas")
     .insert([{
       usuario_id: usuarioId,
@@ -165,17 +162,9 @@ const finalizarCompra = async () => {
     .select()
     .single();
 
-  if (errorVenta) {
-    console.error(errorVenta);
-    Swal.fire("Error creando venta");
-    return;
-  }
-
   const ventaId = venta.id;
 
-  // DETALLE + STOCK
   for (const p of carrito) {
-
     await supabase.from("detalle_venta").insert([{
       venta_id: ventaId,
       producto_id: p.producto_id,
@@ -183,24 +172,32 @@ const finalizarCompra = async () => {
       precio: p.precio
     }]);
 
-    const { data: producto } = await supabase
+    const { data: prod } = await supabase
       .from("productos")
       .select("stock")
       .eq("id", p.producto_id)
       .single();
 
-    const nuevoStock = producto.stock - p.cantidad;
-
     await supabase
       .from("productos")
-      .update({ stock: nuevoStock })
+      .update({ stock: prod.stock - p.cantidad })
       .eq("id", p.producto_id);
   }
 
-  // limpiar carrito
-  await supabase.from("carrito").delete().neq("id", 0);
+  await supabase
+    .from("carrito")
+    .delete()
+    .eq("usuario_id", usuarioId);
 
-  // Factura
+  //  OBTENER NOMBRE CLIENTE
+  const { data: clienteData } = await supabase
+    .from("clientes")
+    .select("nombre")
+    .eq("id", clienteId)
+    .single();
+
+  const nombreCliente = clienteData?.nombre || "Cliente";
+
   let detalle = "";
   let totalFinal = 0;
 
@@ -221,6 +218,8 @@ const finalizarCompra = async () => {
   Swal.fire({
     title: "Resumen de la Venta",
     html: `
+      <h4>Cliente: ${nombreCliente}</h4>
+      <hr>
       <table style="width:100%">
         <thead>
           <tr>
@@ -244,44 +243,47 @@ const finalizarCompra = async () => {
 // EVENTOS
 tbody.addEventListener("click", async (e) => {
   if (e.target.classList.contains("btnEliminar")) {
-    const id = e.target.getAttribute("data-id");
-    await eliminarProducto(id);
+    await eliminarProducto(e.target.dataset.id);
   }
 });
 
-if (btnFinalizar) {
-  btnFinalizar.addEventListener("click", finalizarCompra);
-}
+btnFinalizar?.addEventListener("click", finalizarCompra);
 
 // INICIO
 window.onload = async () => {
+  const user = await obtenerUsuario();
+  if (!user) return;
+
+  // OBTENER ROL REAL DESDE BD (NO localStorage)
+  const { data } = await supabase
+    .from("usuarios")
+    .select("rol")
+    .eq("correo", user.email)
+    .single();
+
+  rolUsuario = data?.rol?.trim().toLowerCase();
 
   await cargarCarrito();
 
-  const { data: userData } = await supabase.auth.getUser();
-  const email = userData.user.email;
-  
-  // COMPRADOR AUTOMÁTICO
-  if (email.includes("comprador")) {
-
+  if (rolUsuario === "comprador") {
+    // ocultar select
     selectCliente.style.display = "none";
 
-    const cliente = await obtenerClienteAutomatico(email);
+    // obtener cliente automáticamente
+    const cliente = await obtenerClienteAutomatico(user.email);
 
     if (cliente) {
       clienteAutoId = cliente.id;
-      console.log("Cliente automático:", cliente);
-      const menuClientes = document.getElementById("menuClientes");
-    const menuEmpleados = document.getElementById("menuEmpleados");
 
-    if (menuClientes) menuClientes.style.display = "none";
-    if (menuEmpleados) menuEmpleados.style.display = "none";
-    } else {
-      Swal.fire("Cliente no encontrado en BD");
+      // mostrar nombre
+      if (labelCliente) {
+        labelCliente.innerHTML = `Cliente: <strong>${cliente.nombre}</strong>`;
+      }
     }
 
   } else {
-    // ADMIN / VENDEDOR
+    // admin o vendedor
+    selectCliente.style.display = "block";
     await cargarClientes();
   }
 };

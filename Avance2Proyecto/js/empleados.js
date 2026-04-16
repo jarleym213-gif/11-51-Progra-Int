@@ -6,19 +6,19 @@ const btnLoad = document.getElementById("btnLoad");
 const btnAdd = document.getElementById("btnAdd");
 const btnCancel = document.getElementById("btnCancel");
 
-
 const txtId = document.getElementById("txtId");
 const txtNombre = document.getElementById("txtNombre");
 const txtCorreo = document.getElementById("txtCorreo");
-const txtPuesto = document.getElementById("txtPuesto");
+//const txtPuesto = document.getElementById("txtPuesto");
 const tituloForm = document.getElementById("tituloForm");
+const txtRol = document.getElementById("txtRol");
+
 
 // FUNCIONES
 let rolUsuario = "";
 
 // CONSULTAR
 const consultarEmpleados = async () => {
-
   const { data, error } = await supabase
     .from("empleados")
     .select("id,nombre,correo,cargo")
@@ -33,9 +33,9 @@ const consultarEmpleados = async () => {
   tbody.innerHTML = "";
 
   data.forEach((e) => {
-
-    const botonesAdmin = rolUsuario === "admin"
-      ? `
+    const botonesAdmin =
+      rolUsuario === "admin"
+        ? `
         <button class="btnEditar btn btn-warning btn-sm" data-id="${e.id}">
           Editar
         </button>
@@ -43,7 +43,7 @@ const consultarEmpleados = async () => {
           Eliminar
         </button>
       `
-      : "";
+        : "";
 
     const tr = document.createElement("tr");
 
@@ -56,19 +56,18 @@ const consultarEmpleados = async () => {
     `;
 
     tbody.appendChild(tr);
-
   });
-
 };
 
 // GUARDAR
 const guardarEmpleado = async () => {
-
   const empleado = {
     nombre: txtNombre.value.trim(),
     correo: txtCorreo.value.trim(),
-    cargo: txtPuesto.value.trim()
+    cargo: txtRol.value.trim(),
   };
+
+  const rol = txtRol.value;
 
   if (!empleado.nombre || !empleado.correo || !empleado.cargo) {
     Swal.fire("Complete todos los campos");
@@ -79,21 +78,63 @@ const guardarEmpleado = async () => {
 
   if (txtId.value) {
 
-    const response = await supabase
-      .from("empleados")
-      .update(empleado)
-      .eq("id", txtId.value);
+  const response = await supabase
+    .from("empleados")
+    .update(empleado)
+    .eq("id", txtId.value);
 
-    error = response.error;
+  error = response.error;
+
+  // ACTUALIZAR ROL EN TABLA USUARIOS TAMBIÉN
+  if (!error) {
+    await supabase
+      .from("usuarios")
+      .update({ rol: txtRol.value })
+      .eq("correo", txtCorreo.value);
+       }
 
   } else {
+    const { data: existe } = await supabase
+      .from("usuarios")
+      .select("*")
+      .eq("correo", empleado.correo)
+      .maybeSingle();
 
-    const response = await supabase
-      .from("empleados")
-      .insert([empleado]);
+    if (existe) {
+      Swal.fire("El correo ya está registrado");
+      return;
+    }
+
+    // 1. Crear usuario en AUTH
+    const { data, errorAuth } = await supabase.auth.signUp({
+      email: empleado.correo,
+      password: "123456",
+    });
+
+    if (errorAuth) {
+      console.error(errorAuth);
+      Swal.fire("Error creando usuario en Auth");
+      return;
+    }
+
+    // 2. Guardar en tabla usuarios (ROL)
+    const { error: errorUsuario } = await supabase.from("usuarios").insert([
+      {
+        correo: empleado.correo,
+        rol: txtRol.value,
+      },
+    ]);
+
+    if (errorUsuario) {
+      console.error(errorUsuario);
+      Swal.fire("Error guardando rol");
+      return;
+    }
+   
+    // 3. Guardar en tabla empleados
+    const response = await supabase.from("empleados").insert([empleado]);
 
     error = response.error;
-
   }
 
   if (error) {
@@ -106,7 +147,6 @@ const guardarEmpleado = async () => {
 
   limpiarFormulario();
   consultarEmpleados();
-
 };
 
 // ELIMINAR
@@ -114,10 +154,7 @@ const eliminarEmpleado = async (id) => {
   if (rolUsuario !== "admin") return;
   if (!confirm("¿Eliminar empleado?")) return;
 
-  const { error } = await supabase
-    .from("empleados")
-    .delete()
-    .eq("id", id);
+  const { error } = await supabase.from("empleados").delete().eq("id", id);
 
   if (error) {
     console.error(error);
@@ -125,7 +162,6 @@ const eliminarEmpleado = async (id) => {
   } else {
     consultarEmpleados();
   }
-
 };
 
 // LIMPIAR
@@ -133,8 +169,8 @@ const limpiarFormulario = () => {
   txtId.value = "";
   txtNombre.value = "";
   txtCorreo.value = "";
-  txtPuesto.value = "";
-   btnAdd.textContent = "Guardar";
+  txtRol.value = "";
+  btnAdd.textContent = "Guardar";
   tituloForm.textContent = "Agregar Empleado";
 };
 
@@ -146,7 +182,6 @@ if (btnCancel) btnCancel.addEventListener("click", limpiarFormulario);
 
 // DELEGACIÓN
 tbody.addEventListener("click", async (event) => {
-
   const target = event.target;
 
   if (target.classList.contains("btnEliminar")) {
@@ -155,7 +190,6 @@ tbody.addEventListener("click", async (event) => {
   }
 
   if (target.classList.contains("btnEditar")) {
-
     const id = target.getAttribute("data-id");
 
     const { data, error } = await supabase
@@ -173,11 +207,10 @@ tbody.addEventListener("click", async (event) => {
     txtId.value = data.id;
     txtNombre.value = data.nombre;
     txtCorreo.value = data.correo;
-    txtPuesto.value = data.cargo;
-      btnAdd.textContent = "Actualizar";
+    txtRol.value = data.cargo;
+    btnAdd.textContent = "Actualizar";
     tituloForm.textContent = "Editar Empleado";
   }
-
 });
 
 // INICIALIZACIÓN
@@ -197,7 +230,6 @@ window.onload = async () => {
 
   await consultarEmpleados();
 };
-
 
 // OBTENER ROL USUARIO
 const obtenerRol = async () => {

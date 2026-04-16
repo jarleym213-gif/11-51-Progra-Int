@@ -225,10 +225,19 @@ const eliminarProducto = async (id) => {
 
 // AGREGAR AL CARRITO
 const agregarCarrito = async (id, nombre, precio, cantidad) => {
+  const user = JSON.parse(localStorage.getItem("usuario"));
+
+  if (!user) {
+    Swal.fire("Debe iniciar sesión");
+    return;
+  }
+
+  // Buscar si ya existe ese producto en el carrito del usuario
   const { data: existe } = await supabase
     .from("carrito")
     .select("*")
     .eq("producto_id", id)
+    .eq("usuario_id", user.id) // 🔥 CLAVE
     .maybeSingle();
 
   if (existe) {
@@ -247,6 +256,7 @@ const agregarCarrito = async (id, nombre, precio, cantidad) => {
         nombre: nombre,
         precio: precio,
         cantidad: cantidad,
+        usuario_id: user.id,
       },
     ]);
 

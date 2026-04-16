@@ -16,6 +16,13 @@ const tituloForm = document.getElementById("tituloForm");
 // VARIABLES GLOBALES
 let rolUsuario = "";
 
+//proteccion de menu
+//const user = JSON.parse(localStorage.getItem("usuario"));
+
+//if (!user || user.rol === "comprador") {
+  //window.location.href = "index.html";
+//}
+
 // CONSULTAR
 const consultarClientes = async () => {
 

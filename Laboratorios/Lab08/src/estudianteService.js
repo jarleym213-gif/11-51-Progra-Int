@@ -186,7 +186,7 @@ export const eliminarEstudiante = async (id) => {
 */
 export const guardarEstudiante = async (estudiante) => {
   if (estudiante.id) {
-    return await actualizarEstudiante(estudiante.id, estudiante);
+    return await actualizaEstudiante(estudiante.id, estudiante);
   }
 
   return await crearEstudiante(estudiante);

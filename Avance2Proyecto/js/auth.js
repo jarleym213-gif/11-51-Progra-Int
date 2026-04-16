@@ -1,25 +1,38 @@
-// Obtenemos el usuario 
 const user = JSON.parse(localStorage.getItem("usuario"));
 
-//Validamos si el usuario está logueado o no
-if (!user) {
-  // si NO está logueado → lo manda al login
-  if (!window.location.href.includes("login.html")) {
-    window.location.href = "login.html";
-  }
+// páginas públicas
+const publicPages = ["login.html"];
+const isPublic = publicPages.some(p =>
+  window.location.pathname.includes(p)
+);
+
+// si no hay usuario → login
+if (!user && !isPublic) {
+  window.location.href = "login.html";
 }
 
-// Mostramos el email del usuario logueado en el header
+// mostrar email
 const usuarioLogueado = document.getElementById("usuarioLogueado");
-
 if (user && usuarioLogueado) {
   usuarioLogueado.innerText = user.email;
 }
 
+// CONTROL DE MENÚ POR ROL
+const menuClientes = document.getElementById("menuClientes");
+const menuEmpleados = document.getElementById("menuEmpleados");
 
-// Logout: 
+// SOLO OCULTAR SI ES COMPRADOR
+if (user?.rol === "comprador") {
+  if (menuClientes) menuClientes.style.display = "none";
+  if (menuEmpleados) menuEmpleados.style.display = "none";
+} else {
+  // admin o vendedor → se muestran
+  if (menuClientes) menuClientes.style.display = "block";
+  if (menuEmpleados) menuEmpleados.style.display = "block";
+}
+
+// logout global
 window.logout = () => {
   localStorage.removeItem("usuario");
   window.location.href = "login.html";
 };
-
