@@ -1,4 +1,5 @@
 import { supabase } from "./supabase.js";
+import { actualizarContadorCarrito } from "./carrito-utils.js";
 
 // REFERENCIAS DOM
 const tbody = document.getElementById("tbodyCarrito");
@@ -7,11 +8,22 @@ const btnFinalizar = document.getElementById("btnFinalizar");
 const selectCliente = document.getElementById("selectCliente");
 const labelCliente = document.getElementById("clienteSeleccionado");
 
-// VARIABLES GLOBALES
+// Variables globales
+let usuarioActual = null;
 let clienteAutoId = null;
 let rolUsuario = "";
 
-// OBTENER USUARIO LOGUEADO
+// INICIO
+window.onload = async () => {
+  usuarioActual = await obtenerUsuario();
+  if (!usuarioActual) return;
+
+  await obtenerRol();
+  await cargarCarrito();
+  await configurarVistaPorRol();
+};
+
+// AUTENTICACIÓN USER DESD SUPABASE
 const obtenerUsuario = async () => {
   const { data } = await supabase.auth.getUser();
 
@@ -23,12 +35,27 @@ const obtenerUsuario = async () => {
   return data.user;
 };
 
-// OBTENER CLIENTE AUTOMÁTICO
-const obtenerClienteAutomatico = async (email) => {
+const obtenerRol = async () => {
+  const { data, error } = await supabase
+    .from("usuarios")
+    .select("rol")
+    .eq("correo", usuarioActual.email)
+    .single();
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  rolUsuario = data?.rol?.trim().toLowerCase();
+};
+
+// CLIENTES
+const obtenerClienteAutomatico = async () => {
   const { data, error } = await supabase
     .from("clientes")
     .select("id,nombre")
-    .eq("correo", email)
+    .eq("correo", usuarioActual.email)
     .maybeSingle();
 
   if (error) {
@@ -39,7 +66,6 @@ const obtenerClienteAutomatico = async (email) => {
   return data;
 };
 
-// CARGAR CLIENTES (ADMIN/VENDEDOR)
 const cargarClientes = async () => {
   const { data, error } = await supabase
     .from("clientes")
@@ -61,15 +87,12 @@ const cargarClientes = async () => {
   });
 };
 
-// CARGAR CARRITO
+// CARRITO
 const cargarCarrito = async () => {
-  const user = await obtenerUsuario();
-  if (!user) return;
-
   const { data, error } = await supabase
     .from("carrito")
     .select("*")
-    .eq("usuario_id", user.id);
+    .eq("usuario_id", usuarioActual.id);
 
   if (error) {
     console.error(error);
@@ -77,10 +100,15 @@ const cargarCarrito = async () => {
     return;
   }
 
+  renderCarrito(data);
+};
+
+// SOLO UI
+const renderCarrito = (data) => {
   tbody.innerHTML = "";
   let total = 0;
 
-  data.forEach((p) => {
+  data.forEach(p => {
     const subtotal = p.precio * p.cantidad;
     total += subtotal;
 
@@ -93,9 +121,7 @@ const cargarCarrito = async () => {
       <td>${p.cantidad}</td>
       <td>₡${subtotal}</td>
       <td>
-        <button class="btn btn-danger btn-sm btnEliminar" data-id="${p.id}">
-          Eliminar
-        </button>
+        <button class="btnEliminar btn btn-danger btn-sm" data-id="${p.id}">Eliminar</button>
       </td>
     `;
 
@@ -105,7 +131,7 @@ const cargarCarrito = async () => {
   totalText.innerText = "₡" + total;
 };
 
-// ELIMINAR
+// ELIMINAR PRODUCTO
 const eliminarProducto = async (id) => {
   const { error } = await supabase
     .from("carrito")
@@ -114,56 +140,56 @@ const eliminarProducto = async (id) => {
 
   if (error) {
     Swal.fire("Error eliminando");
-  } else {
-    cargarCarrito();
+    return;
   }
+
+  cargarCarrito();
 };
 
-// FINALIZAR COMPRA
-const finalizarCompra = async () => {
-  const user = await obtenerUsuario();
-  if (!user) return;
+// OBTENER CLIENTE SELECCIONADO O MOSTRAR AUTOMÁTICO
+const obtenerClienteSeleccionado = () => {
+  if (rolUsuario === "comprador") return clienteAutoId;
+  return selectCliente.value;
+};
 
-  const usuarioId = user.id;
-
-  let clienteId;
-
-  if (rolUsuario  === "comprador") {
-    clienteId = clienteAutoId;
-  } else {
-    clienteId = selectCliente.value;
-  }
-
-  if (!clienteId) {
-    Swal.fire("Seleccione un cliente");
-    return;
-  }
-
-  const { data: carrito } = await supabase
+const obtenerCarrito = async () => {
+  const { data, error } = await supabase
     .from("carrito")
     .select("*")
-    .eq("usuario_id", usuarioId);
+    .eq("usuario_id", usuarioActual.id);
 
-  if (!carrito || carrito.length === 0) {
-    Swal.fire("Carrito vacío");
-    return;
+  if (error) {
+    console.error(error);
+    return [];
   }
 
-  let total = 0;
-  carrito.forEach(p => total += p.precio * p.cantidad);
+  return data;
+};
 
-  const { data: venta } = await supabase
+const calcularTotal = (carrito) => {
+  return carrito.reduce((acc, p) => acc + (p.precio * p.cantidad), 0);
+};
+
+const crearVenta = async (clienteId, total) => {
+  const { data, error } = await supabase
     .from("ventas")
     .insert([{
-      usuario_id: usuarioId,
+      usuario_id: usuarioActual.id,
       cliente_id: clienteId,
       total: total
     }])
     .select()
     .single();
 
-  const ventaId = venta.id;
+  if (error) {
+    console.error(error);
+    return null;
+  }
 
+  return data;
+};
+
+const guardarDetalle = async (ventaId, carrito) => {
   for (const p of carrito) {
     await supabase.from("detalle_venta").insert([{
       venta_id: ventaId,
@@ -171,8 +197,12 @@ const finalizarCompra = async () => {
       cantidad: p.cantidad,
       precio: p.precio
     }]);
+  }
+};
 
-    const { data: prod } = await supabase
+const actualizarStock = async (carrito) => {
+  for (const p of carrito) {
+    const { data } = await supabase
       .from("productos")
       .select("stock")
       .eq("id", p.producto_id)
@@ -180,16 +210,43 @@ const finalizarCompra = async () => {
 
     await supabase
       .from("productos")
-      .update({ stock: prod.stock - p.cantidad })
+      .update({ stock: data.stock - p.cantidad })
       .eq("id", p.producto_id);
   }
+};
 
+const limpiarCarrito = async () => {
   await supabase
     .from("carrito")
     .delete()
-    .eq("usuario_id", usuarioId);
+    .eq("usuario_id", usuarioActual.id);
+};
 
-  //  OBTENER NOMBRE CLIENTE
+// FINALIZAR COMPRA
+const finalizarCompra = async () => {
+  const clienteId = obtenerClienteSeleccionado();
+
+  if (!clienteId) {
+    Swal.fire("Seleccione un cliente");
+    return;
+  }
+
+  const carrito = await obtenerCarrito();
+
+  if (carrito.length === 0) {
+    Swal.fire("Carrito vacío");
+    return;
+  }
+
+  const total = calcularTotal(carrito);
+
+  const venta = await crearVenta(clienteId, total);
+  if (!venta) return;
+
+  await guardarDetalle(venta.id, carrito);
+  await actualizarStock(carrito);
+
+  // OBTENER NOMBRE DEL CLIENTE PARA MOSTRAR EN EL RESUMEN
   const { data: clienteData } = await supabase
     .from("clientes")
     .select("nombre")
@@ -198,6 +255,7 @@ const finalizarCompra = async () => {
 
   const nombreCliente = clienteData?.nombre || "Cliente";
 
+  // ARMAR DETALLE PARA MOSTRAR EN EL RESUMEN
   let detalle = "";
   let totalFinal = 0;
 
@@ -215,32 +273,64 @@ const finalizarCompra = async () => {
     `;
   });
 
-  Swal.fire({
-    title: "Resumen de la Venta",
-    html: `
-      <h4>Cliente: ${nombreCliente}</h4>
-      <hr>
-      <table style="width:100%">
-        <thead>
-          <tr>
-            <th>Producto</th>
-            <th>Cant</th>
-            <th>Precio</th>
-            <th>Subtotal</th>
-          </tr>
-        </thead>
-        <tbody>${detalle}</tbody>
-      </table>
-      <hr>
-      <h3>Total: ₡${totalFinal}</h3>
-    `,
-    width: 600
-  });
+  const fecha = new Date(venta.fecha).toLocaleString();
+  // MOSTRAR RESUMEN DE LA VENTA ANTES DE LIMPIAR EL CARRITO
+  await Swal.fire({
+  title: "Factura de Compra",
+  html: `
+    <h4>Cliente: ${nombreCliente}</h4>
+    <p><strong>Fecha:</strong> ${fecha}</p>
+    <hr>
+    <table style="width:100%">
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Cant</th>
+          <th>Precio</th>
+          <th>Subtotal</th>
+        </tr>
+      </thead>
+      <tbody>${detalle}</tbody>
+    </table>
+    <hr>
+    <h3>Total: ₡${totalFinal}</h3>
+  `,
+  width: 600
+});
+
+  //LIMPIAR CARRITO DESPUÉS DE MOSTRAR EL RESUMEN
+  await limpiarCarrito();
 
   cargarCarrito();
 };
 
-// EVENTOS
+// CONFIGURAR VISTA POR ROL
+const configurarVistaPorRol = async () => {
+  if (rolUsuario === "comprador") {
+    selectCliente.style.display = "none";
+
+    const cliente = await obtenerClienteAutomatico();
+
+    if (cliente) {
+      clienteAutoId = cliente.id;
+      labelCliente.innerHTML = `Cliente: <strong>${cliente.nombre}</strong>`;
+    }
+
+  } else {
+    selectCliente.style.display = "block";
+    await cargarClientes();
+  }
+};
+// ACTUALIZAR CONTADOR CARRITO
+document.addEventListener("DOMContentLoaded", () => {
+  actualizarContadorCarrito();
+});
+// ACTUALIZAR CONTADOR CARRITO
+document.addEventListener("DOMContentLoaded", () => {
+  actualizarContadorCarrito();
+});
+
+// EVENTOS ELIMINAR Y FINALIZAR
 tbody.addEventListener("click", async (e) => {
   if (e.target.classList.contains("btnEliminar")) {
     await eliminarProducto(e.target.dataset.id);
@@ -248,42 +338,3 @@ tbody.addEventListener("click", async (e) => {
 });
 
 btnFinalizar?.addEventListener("click", finalizarCompra);
-
-// INICIO
-window.onload = async () => {
-  const user = await obtenerUsuario();
-  if (!user) return;
-
-  // OBTENER ROL REAL DESDE BD (NO localStorage)
-  const { data } = await supabase
-    .from("usuarios")
-    .select("rol")
-    .eq("correo", user.email)
-    .single();
-
-  rolUsuario = data?.rol?.trim().toLowerCase();
-
-  await cargarCarrito();
-
-  if (rolUsuario === "comprador") {
-    // ocultar select
-    selectCliente.style.display = "none";
-
-    // obtener cliente automáticamente
-    const cliente = await obtenerClienteAutomatico(user.email);
-
-    if (cliente) {
-      clienteAutoId = cliente.id;
-
-      // mostrar nombre
-      if (labelCliente) {
-        labelCliente.innerHTML = `Cliente: <strong>${cliente.nombre}</strong>`;
-      }
-    }
-
-  } else {
-    // admin o vendedor
-    selectCliente.style.display = "block";
-    await cargarClientes();
-  }
-};

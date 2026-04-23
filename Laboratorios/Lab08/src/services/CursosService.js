@@ -4,23 +4,7 @@
 // Ajustar la ruta según el proyecto
 // Ejemplo:
 // import { supabase } from "../supabaseClient";
-import { supabase } from "./supabaseClient";
-
-/*
-  ============================================================
-  studentService.js
-  ============================================================
-
-  Propósito:
-  Centralizar todas las operaciones de base de datos
-  relacionadas con la tabla "estudiantes".
-
-  ¿Por qué es importante?
-  - Evita mezclar lógica de base de datos con la UI (React)
-  - Hace el código más ordenado y reutilizable
-  - Permite replicar fácilmente para otras tablas
-    (cursos, profesores, productos, etc.)
-*/
+import { supabase } from "../supabaseClient";
 
 /*
   ------------------------------------------------------------
@@ -28,13 +12,14 @@ import { supabase } from "./supabaseClient";
   ------------------------------------------------------------
   Se define como constante para no repetir texto en todo el código
 */
-const TABLA_NOMBRE = "estudiantes";
-const COLUMNAS_MOSTRAR = "id, nombre, apellido, correo, carrera, fechaNac";
+const TABLA_NOMBRE = "cursos";
+const ENTIDAD_NOMBRE = "curso";
+const COLUMNAS_MOSTRAR = "id, nombre, creditos, codigo";
 /*
   ------------------------------------------------------------
-  mapEstudiantePayload
+  mapCursoPayload
   ------------------------------------------------------------
-  Esta función recibe un objeto estudiante y devuelve
+  Esta función recibe un objeto curso y devuelve
   solo los campos necesarios para la base de datos.
 
   ¿Para qué sirve?
@@ -42,25 +27,24 @@ const COLUMNAS_MOSTRAR = "id, nombre, apellido, correo, carrera, fechaNac";
   - Limpiar valores (trim)
   - Estandarizar inserts y updates
 */
-const mapEstudiantePayload = (estudiante) => ({
-  nombre: estudiante.nombre?.trim() || "",
-  apellido: estudiante.apellido?.trim() || "",
-  correo: estudiante.correo?.trim() || "",
-  carrera: estudiante.carrera?.trim() || "",
-  fechaNac: estudiante.fechaNac || null,
+const mapCursoPayload = (curso) => ({
+  nombre: curso.nombre?.trim() || "",
+  creditos: curso.creditos?.trim() || "",
+  codigo: curso.codigo?.trim() || ""
 });
 
+//SOLID PRINCIPLE: Single Responsibility
 
 /*
   ------------------------------------------------------------
-  Obtener estudiantes
+  Obtener cursos
   ------------------------------------------------------------
-  Permite obtener todos los estudiantes.
+  Permite obtener todos los cursos.
 
   Parámetro opcional:
-  - search: texto para filtrar por nombre o apellido
+  - search: texto para filtrar por nombre o código
 */
-export const obtenerEstudiantes = async (search = "") => {
+export const obtenerTodos = async (search = "") => {
   // Creamos la consulta base
   let query = supabase
     .from(TABLA_NOMBRE)
@@ -71,14 +55,14 @@ export const obtenerEstudiantes = async (search = "") => {
 
   // Si hay texto, aplicamos filtro
   if (term) {
-    query = query.or(`nombre.ilike.%${term}%,apellido.ilike.%${term}%`);
+    query = query.or(`nombre.ilike.%${term}%,codigo.ilike.%${term}%`);
   }
 
   const { data, error } = await query;
 
   if (error) {
-    console.error("Error al cargar estudiantes:", error);
-    throw new Error("No se pudieron cargar los estudiantes");
+    console.error(`Error al cargar ${ENTIDAD_NOMBRE}s:`, error);
+    throw new Error(`No se pudieron cargar los ${ENTIDAD_NOMBRE}s`);
   }
 
   return data;
@@ -86,13 +70,13 @@ export const obtenerEstudiantes = async (search = "") => {
 
 /*
   ------------------------------------------------------------
-  Obtener estudiante por ID
+  Obtener curso por ID
   ------------------------------------------------------------
   Útil para:
   - Editar
   - Ver detalles
 */
-export const obtenerEstudiantePorId = async (id) => {
+export const obtener = async (id) => {
   const { data, error } = await supabase
     .from(TABLA_NOMBRE)
     .select(COLUMNAS_MOSTRAR)
@@ -100,8 +84,8 @@ export const obtenerEstudiantePorId = async (id) => {
     .single();
 
   if (error) {
-    console.error("Error al obtener estudiante:", error);
-    throw new Error("No se pudo obtener el estudiante");
+    console.error(`Error al obtener ${ENTIDAD_NOMBRE}:`, error);
+    throw new Error(`No se pudo obtener el ${ENTIDAD_NOMBRE}`);
   }
 
   return data;
@@ -109,12 +93,12 @@ export const obtenerEstudiantePorId = async (id) => {
 
 /*
   ------------------------------------------------------------
-  Crear estudiante
+  Crear curso
   ------------------------------------------------------------
   Inserta un nuevo registro en la base de datos
 */
-export const crearEstudiante = async (estudiante) => {
-  const payload = mapEstudiantePayload(estudiante);
+export const crear = async (curso) => {
+  const payload = mapCursoPayload(curso);
 
   const { data, error } = await supabase
     .from(TABLA_NOMBRE)
@@ -123,8 +107,8 @@ export const crearEstudiante = async (estudiante) => {
     .single();
 
   if (error) {
-    console.error("Error al crear estudiante:", error);
-    throw new Error("No se pudo crear el estudiante");
+    console.error(`Error al crear ${ENTIDAD_NOMBRE}:`, error);
+    throw new Error(`No se pudo crear el ${ENTIDAD_NOMBRE}`);
   }
 
   return data;
@@ -132,12 +116,12 @@ export const crearEstudiante = async (estudiante) => {
 
 /*
   ------------------------------------------------------------
-  Actualizar estudiante
+  Actualizar curso
   ------------------------------------------------------------
   Actualiza un registro existente
 */
-export const actualizarEstudiante = async (id, estudiante) => {
-  const payload = mapEstudiantePayload(estudiante);
+export const actualizar = async (id, curso) => {
+  const payload = mapCursoPayload(curso);
 
   const { data, error } = await supabase
     .from(TABLA_NOMBRE)
@@ -147,8 +131,8 @@ export const actualizarEstudiante = async (id, estudiante) => {
     .single();
 
   if (error) {
-    console.error("Error al actualizar estudiante:", error);
-    throw new Error("No se pudo actualizar el estudiante");
+    console.error(`Error al actualizar ${ENTIDAD_NOMBRE}:`, error);
+    throw new Error(`No se pudo actualizar el ${ENTIDAD_NOMBRE}`);
   }
 
   return data;
@@ -156,19 +140,19 @@ export const actualizarEstudiante = async (id, estudiante) => {
 
 /*
   ------------------------------------------------------------
-  Eliminar estudiante
+  Eliminar curso
   ------------------------------------------------------------
   Elimina un registro por ID
 */
-export const eliminarEstudiante = async (id) => {
+export const eliminar = async (id) => {
   const { error } = await supabase
     .from(TABLA_NOMBRE)
     .delete()
     .eq("id", id);
 
   if (error) {
-    console.error("Error al eliminar estudiante:", error);
-    throw new Error("No se pudo eliminar el estudiante");
+    console.error(`Error al eliminar ${ENTIDAD_NOMBRE}:`, error);
+    throw new Error(`No se pudo eliminar el ${ENTIDAD_NOMBRE}`);
   }
 
   return true;
@@ -176,7 +160,7 @@ export const eliminarEstudiante = async (id) => {
 
 /*
   ------------------------------------------------------------
-  Guardar estudiante (create o update)
+  Guardar curso (create o update)
   ------------------------------------------------------------
   Esta función decide automáticamente si:
   - Crear (si no tiene id)
@@ -184,12 +168,12 @@ export const eliminarEstudiante = async (id) => {
 
   Esto simplifica mucho el código en React
 */
-export const guardarEstudiante = async (estudiante) => {
-  if (estudiante.id) {
-    return await actualizaEstudiante(estudiante.id, estudiante);
+export const guardar = async (curso) => {
+  if (curso.id) {
+    return await actualizar(curso.id, curso);
   }
 
-  return await crearEstudiante(estudiante);
+  return await crear(curso);
 };
 
 /*
@@ -203,16 +187,16 @@ export const guardarEstudiante = async (estudiante) => {
      const TABLE_NAME = "cursos";
 
   2. Cambiar map:
-     const mapCoursePayload = (course) => ({
-       nombre: course.nombre,
-       creditos: course.creditos
+     const mapCursoPayload = (curso) => ({
+       nombre: curso.nombre,
+       creditos: curso.creditos
      });
 
   3. Cambiar campos en select:
-     .select("id, nombre, creditos")
+     const COLUMNAS_MOSTRAR = "id, nombre, creditos";
 
   4. Renombrar funciones:
-     getCourses, createCourse, etc.
+     getCursos, createCurso, etc.
 
   Esto permite crear servicios rápidamente y mantener orden.
 */

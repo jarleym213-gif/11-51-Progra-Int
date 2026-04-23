@@ -2,10 +2,10 @@ admin@gmail.com
 12345
 Acceso total con todos los botones habilitados
 
-vendedor@gmail.com
-12345
+carlos@gmail.com
+123456
 Deshabilité los botones de editar y eliminar
 
-comprador@email.com
-1234
+comprador@gmail.com
+123456
 Deshabilité del menú (clientes y empleados), y los botones de editar agregar y eliminar productos.

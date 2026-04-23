@@ -12,6 +12,7 @@ const txtMarca = document.getElementById("txtMarca");
 const txtPrecio = document.getElementById("txtPrecio");
 const txtStock = document.getElementById("txtStock");
 const tituloForm = document.getElementById("tituloForm");
+const txtDescripcion = document.getElementById("txtDescripcion");
 
 // VARIABLES GLOBALES
 let rolUsuario = "";
@@ -19,6 +20,7 @@ let cantidades = {};
 
 //INICIO
 window.onload = async () => {
+  await actualizarContadorCarrito();
   await obtenerRol();
   console.log("Rol detectado:", rolUsuario);
   if (rolUsuario === "comprador") {
@@ -30,7 +32,9 @@ window.onload = async () => {
     if (menuEmpleados) menuEmpleados.style.display = "none";
     if (interno) interno.style.display = "none";
   }
-  await consultarProductos();
+  if (contenedor) {
+    await consultarProductos();
+  }
 };
 
 // OBTENER ROL USUARIO
@@ -45,8 +49,9 @@ const obtenerRol = async () => {
   const { data, error } = await supabase
     .from("usuarios")
     .select("rol")
-    .eq("correo", userData.user.email)
+    .eq("id", userData.user.id)
     .maybeSingle();
+    console.log("Respuesta rol:", data, error);
 
   if (error) {
     console.error(error);
@@ -108,6 +113,7 @@ const consultarProductos = async () => {
           <h6>${p.marca}</h6>
           <p>₡${p.precio}</p>
           <small>Stock: ${p.stock}</small>
+          <p class="text-muted small mt-2">${p.descripcion || ""}</p>
 
           <div class="d-flex justify-content-center align-items-center mt-2">
 
@@ -148,13 +154,16 @@ const guardarProducto = async () => {
     marca: txtMarca.value.trim(),
     precio: txtPrecio.value.trim(),
     stock: txtStock.value.trim(),
+    descripcion: txtDescripcion.value.trim(),
+    fecha_creacion: new Date()
   };
 
   if (
     !producto.nombre ||
     !producto.marca ||
     !producto.precio ||
-    !producto.stock
+    !producto.stock ||
+    !producto.descripcion
   ) {
     Swal.fire("Complete todos los campos");
     return;
@@ -225,20 +234,25 @@ const eliminarProducto = async (id) => {
 
 // AGREGAR AL CARRITO
 const agregarCarrito = async (id, nombre, precio, cantidad) => {
-  const user = JSON.parse(localStorage.getItem("usuario"));
+
+  const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
     Swal.fire("Debe iniciar sesión");
     return;
   }
 
-  // Buscar si ya existe ese producto en el carrito del usuario
-  const { data: existe } = await supabase
+  const { data: existe, error: errorSelect } = await supabase
     .from("carrito")
     .select("*")
     .eq("producto_id", id)
-    .eq("usuario_id", user.id) // 🔥 CLAVE
+    .eq("usuario_id", user.id)
     .maybeSingle();
+
+  if (errorSelect) {
+    console.error(errorSelect);
+    return;
+  }
 
   if (existe) {
     const nuevaCantidad = existe.cantidad + cantidad;
@@ -248,22 +262,25 @@ const agregarCarrito = async (id, nombre, precio, cantidad) => {
       .update({ cantidad: nuevaCantidad })
       .eq("id", existe.id);
 
-    Swal.fire(`Cantidad actualizada (${nuevaCantidad})`);
   } else {
-    await supabase.from("carrito").insert([
-      {
-        producto_id: id,
-        nombre: nombre,
-        precio: precio,
-        cantidad: cantidad,
-        usuario_id: user.id,
-      },
-    ]);
+    const { error } = await supabase.from("carrito").insert([{
+      producto_id: id,
+      nombre,
+      precio,
+      cantidad,
+      usuario_id: user.id
+    }]);
 
-    Swal.fire(`Agregado ${cantidad} al carrito`);
+    if (error) {
+      console.error(error);
+      Swal.fire(error.message);
+      return;
+    }
   }
-};
 
+  await actualizarContadorCarrito();
+  Swal.fire("Agregado al carrito");
+};
 // LIMPIAR FORMULARIO
 const limpiarFormulario = () => {
   txtId.value = "";
@@ -271,6 +288,7 @@ const limpiarFormulario = () => {
   txtMarca.value = "";
   txtPrecio.value = "";
   txtStock.value = "";
+  txtDescripcion.value = "";
   btnAdd.textContent = "Guardar";
   tituloForm.textContent = "Agregar Producto";
 };
@@ -278,10 +296,19 @@ const limpiarFormulario = () => {
 // EVENTOS GLOBALES
 document.addEventListener("click", async (e) => {
   if (e.target.classList.contains("btnMas")) {
-    const id = e.target.dataset.id;
+  const id = e.target.dataset.id;
+
+  // Obtener stock desde el DOM
+  const stockTexto = document.querySelector(`#producto-${id} small`).innerText;
+  const stock = parseInt(stockTexto.replace("Stock: ", ""));
+
+  if (cantidades[id] < stock) {
     cantidades[id]++;
     document.getElementById(`cant-${id}`).innerText = cantidades[id];
+  } else {
+    Swal.fire("No puedes superar el stock disponible");
   }
+}
 
   if (e.target.classList.contains("btnMenos")) {
     const id = e.target.dataset.id;
@@ -313,6 +340,7 @@ document.addEventListener("click", async (e) => {
     txtMarca.value = data.marca;
     txtPrecio.value = data.precio;
     txtStock.value = data.stock;
+    txtDescripcion.value = data.descripcion || "";
     btnAdd.textContent = "Actualizar";
     tituloForm.textContent = "Editar Producto";
   }
@@ -325,9 +353,9 @@ document.addEventListener("click", async (e) => {
 
 // EVENTOS BOTONES
 
-btnLoad.addEventListener("click", async () => consultarProductos());
-btnAdd.addEventListener("click", async () => guardarProducto());
-btnCancel.addEventListener("click", async () => limpiarFormulario());
+if (btnLoad) btnLoad.addEventListener("click", consultarProductos);
+if (btnAdd) btnAdd.addEventListener("click", guardarProducto);
+if (btnCancel) btnCancel.addEventListener("click", limpiarFormulario);
 
 // ICONO
 const obtenerIcono = (nombre) => {
@@ -345,3 +373,40 @@ const obtenerIcono = (nombre) => {
 
   return "fas fa-box";
 };
+
+// ===============================
+// CONTADOR GLOBAL CARRITO
+// ===============================
+const actualizarContadorCarrito = async () => {
+
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) return;
+
+  const { data, error } = await supabase
+    .from("carrito")
+    .select("cantidad")
+    .eq("usuario_id", user.id);
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  const total = data.reduce((acc, item) => acc + item.cantidad, 0);
+
+  const badge = document.getElementById("contadorCarrito");
+
+  if (!badge) return;
+
+  badge.innerText = total;
+  badge.style.display = total > 0 ? "inline-block" : "none";
+};
+
+// EJECUTAR SIEMPRE
+document.addEventListener("DOMContentLoaded", () => {
+  actualizarContadorCarrito();
+});
+
+// hacerla global
+window.actualizarContadorCarrito = actualizarContadorCarrito;

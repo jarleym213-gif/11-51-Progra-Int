@@ -14,22 +14,32 @@
 
 <body>
 
-    <header class="bg-success text-white text-center p-3">
-        <h1>Productos</h1>
-        <nav class="login-menu">
-            <ul class="nav-list">
-                <li><span id="usuarioLogueado"></span></li>
-            </ul>
-        </nav>
-    </header>
+    <header class="custom-header">
 
+        <div class="header-container">
+
+            <h1>Productos</h1>
+
+            <div class="user-box">
+                <i class="fas fa-user-circle"></i>
+                <span id="usuarioLogueado"></span>
+            </div>
+
+        </div>
+
+    </header>
     <nav class="nav-menu">
         <ul class="nav-list">
             <li><a href="index.html">Inicio</a></li>
             <li><a href="productos.html">Productos</a></li>
             <li id="menuClientes" style="display:none;"><a href="clientes.html">Clientes</a></li>
             <li id="menuEmpleados" style="display:none;"><a href="empleados.html">Empleados</a></li>
-            <li><a href="carrito.html">Carrito</a></li>
+            <li style="position: relative;">
+                <a href="carrito.html" id="iconoCarrito">
+                     Carrito
+                    <span id="contadorCarrito" class="badge">0</span>
+                </a>
+            </li>
             <li><a href="contacto.html">Contacto</a></li>
             <li><a href="#" onclick="logout()">Cerrar Sesión</a></li>
         </ul>
@@ -45,6 +55,9 @@
                 </div>
                 <div class="col-md-3">
                     <input type="text" id="txtMarca" class="form-control" placeholder="Marca">
+                </div>
+                <div class="col-md-6">
+                    <input type="text" id="txtDescripcion" class="form-control" placeholder="Descripción">
                 </div>
                 <div class="col-md-2">
                     <input type="number" id="txtPrecio" class="form-control" placeholder="Precio">

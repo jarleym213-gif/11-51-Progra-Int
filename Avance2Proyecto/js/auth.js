@@ -1,37 +1,42 @@
-const user = JSON.parse(localStorage.getItem("usuario"));
+//Usuario logueado
+let user = null;
 
-// páginas públicas
+try {
+  user = JSON.parse(localStorage.getItem("usuario"));
+} catch {
+  user = null;
+}
+
+// Validar acceso 
 const publicPages = ["login.html"];
 const isPublic = publicPages.some(p =>
   window.location.pathname.includes(p)
 );
 
-// si no hay usuario → login
 if (!user && !isPublic) {
   window.location.href = "login.html";
 }
 
-// mostrar email
+//Mostrar usuario logueado
 const usuarioLogueado = document.getElementById("usuarioLogueado");
+
 if (user && usuarioLogueado) {
   usuarioLogueado.innerText = user.email;
 }
 
-// CONTROL DE MENÚ POR ROL
+// Menu según rol
 const menuClientes = document.getElementById("menuClientes");
 const menuEmpleados = document.getElementById("menuEmpleados");
 
-// SOLO OCULTAR SI ES COMPRADOR
 if (user?.rol === "comprador") {
   if (menuClientes) menuClientes.style.display = "none";
   if (menuEmpleados) menuEmpleados.style.display = "none";
 } else {
-  // admin o vendedor → se muestran
   if (menuClientes) menuClientes.style.display = "block";
   if (menuEmpleados) menuEmpleados.style.display = "block";
 }
 
-// logout global
+//logout
 window.logout = () => {
   localStorage.removeItem("usuario");
   window.location.href = "login.html";

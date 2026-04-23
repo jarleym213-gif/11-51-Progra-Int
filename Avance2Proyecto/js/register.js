@@ -1,5 +1,6 @@
 import { supabase } from "./supabase.js";
 
+// REFERENCIAS DOM
 const txtNombre = document.getElementById("txtNombre");
 const txtCorreo = document.getElementById("txtCorreo");
 const txtPassword = document.getElementById("txtPassword");
@@ -9,126 +10,138 @@ const btnRegistrar = document.getElementById("btnRegistrar");
 
 const togglePassword = document.getElementById("togglePassword");
 const toggleConfirmPassword = document.getElementById("toggleConfirmPassword");
-console.log(togglePassword);
+
+// EVENTOS
+//btnRegistrar?.addEventListener("click", registrar);
+
+// REGISTRAR USUARIO
 const registrar = async () => {
-  const nombre = txtNombre.value.trim();
-  const correo = txtCorreo.value.trim();
-  const password = txtPassword.value.trim();
-  const telefono = txtTelefono.value.trim();
-  const confirmPassword = txtConfirmPassword.value.trim();
 
-  // validar campos
-  if (!password || !confirmPassword) {
-    Swal.fire("Ingrese la contraseña");
-    return;
-  }
+  const usuario = obtenerDatosFormulario();
 
-  // validar longitud
-  if (password.length < 6) {
-    Swal.fire("La contraseña debe tener mínimo 6 caracteres");
-    return;
-  }
+  if (!validarFormulario(usuario)) return;
 
-  // validar coincidencia
-  if (password !== confirmPassword) {
-    Swal.fire("Las contraseñas no coinciden");
-    return;
-  }
-  console.log(togglePassword);
+  const existe = await validarUsuarioExistente(usuario.correo);
+  if (existe) return;
 
-  //  Validar si ya existe
-  const { data: existe } = await supabase
-    .from("usuarios")
-    .select("*")
-    .eq("correo", correo)
-    .maybeSingle();
+  const userAuth = await crearAuth(usuario);
+  if (!userAuth) return;
 
-  if (existe) {
-    Swal.fire("El correo ya está registrado");
-    return;
-  }
-
-  // 🔹 1. Crear usuario en AUTH
-const { data, error } = await supabase.auth.signUp({
-  email: correo,
-  password: password,
-});
-
-if (error) {
-  console.error("ERROR AUTH:", error);
-  Swal.fire(error.message);
-  return;
-}
-
-// IMPORTANTE
-if (!data.user) {
-  Swal.fire("No se pudo crear el usuario");
-  return;
-}
-
-const user = data.user;
-
-// 🔹 2. Guardar rol = comprador
-const { error: errorInsert } = await supabase.from("usuarios").insert([
-  {
-    id: user.id,
-    correo: correo,
-    rol: "comprador",
-  },
-]);
-
-if (errorInsert) {
-  console.error(errorInsert);
-  Swal.fire("Error guardando usuario");
-  return;
-}
-
-  // 🔹 2. Guardar rol = comprador
-  await supabase.from("usuarios").insert([
-    {
-      id: user.id,
-      correo: correo,
-      rol: "comprador",
-    },
-  ]);
-
-  // 🔹 3. Guardar cliente
-  await supabase.from("clientes").insert([
-    {
-      nombre: nombre,
-      correo: correo,
-      telefono: telefono,
-    },
-  ]);
+  await guardarUsuarioBD(userAuth, usuario);
+  await guardarCliente(usuario, userAuth);
 
   Swal.fire("Registro exitoso");
 
   window.location.href = "login.html";
 };
+btnRegistrar?.addEventListener("click", registrar);
 
-btnRegistrar.addEventListener("click", registrar);
-// Mostrar / ocultar password
-if (togglePassword) {
-  togglePassword.addEventListener("click", () => {
-    if (txtPassword.type === "password") {
-      txtPassword.type = "text";
-      togglePassword.innerHTML = '<i class="fas fa-eye-slash"></i>';
-    } else {
-      txtPassword.type = "password";
-      togglePassword.innerHTML = '<i class="fas fa-eye"></i>';
-    }
-  });
-}
+// OBTENER DATOS DEL FORMULARIO
+const obtenerDatosFormulario = () => ({
+  nombre: txtNombre.value.trim(),
+  correo: txtCorreo.value.trim(),
+  password: txtPassword.value.trim(),
+  confirmPassword: txtConfirmPassword.value.trim(),
+  telefono: txtTelefono.value.trim()
+});
 
-// Mostrar / ocultar confirm password
-if (toggleConfirmPassword) {
-  toggleConfirmPassword.addEventListener("click", () => {
-    if (txtConfirmPassword.type === "password") {
-      txtConfirmPassword.type = "text";
-      toggleConfirmPassword.innerHTML = '<i class="fas fa-eye-slash"></i>';
-    } else {
-      txtConfirmPassword.type = "password";
-      toggleConfirmPassword.innerHTML = '<i class="fas fa-eye"></i>';
-    }
+// VALIDAR FORMULARIO
+const validarFormulario = (u) => {
+
+  if (!u.nombre || !u.correo || !u.password || !u.confirmPassword || !u.telefono) {
+    Swal.fire("Complete todos los campos");
+    return false;
+  }
+
+  if (!u.correo.includes("@")) {
+    Swal.fire("Correo inválido");
+    return false;
+  }
+
+  if (u.password.length < 6) {
+    Swal.fire("La contraseña debe tener mínimo 6 caracteres");
+    return false;
+  }
+
+  if (u.password !== u.confirmPassword) {
+    Swal.fire("Las contraseñas no coinciden");
+    return false;
+  }
+
+  return true;
+};
+
+// VALIDAR USUARIO EXISTENTE
+const validarUsuarioExistente = async (correo) => {
+  const { data } = await supabase
+    .from("usuarios")
+    .select("*")
+    .eq("correo", correo)
+    .maybeSingle();
+
+  if (data) {
+    Swal.fire("El correo ya está registrado");
+    return true;
+  }
+
+  return false;
+};
+
+// CREAR AUTH
+const crearAuth = async (usuario) => {
+  const { data, error } = await supabase.auth.signUp({
+    email: usuario.correo,
+    password: usuario.password,
   });
-}
+
+  if (error || !data.user) {
+    console.error(error);
+    Swal.fire("Error creando usuario");
+    return null;
+  }
+
+  return data.user;
+};
+
+// GUARDAR USUARIO EN BD
+const guardarUsuarioBD = async (user, usuario) => {
+  const { error } = await supabase.from("usuarios").insert([
+    {
+      id: user.id,
+      correo: usuario.correo,
+      rol: "comprador",
+    },
+  ]);
+
+  if (error) {
+    console.error(error);
+    Swal.fire("Error guardando usuario");
+  }
+};
+
+// GUARDAR CLIENTE
+const guardarCliente = async (usuario, userAuth) => {
+  const { error } = await supabase.from("clientes").insert([
+    {
+      nombre: usuario.nombre,
+      correo: usuario.correo,
+      telefono: usuario.telefono,
+      usuario_id: userAuth.id
+    },
+  ]);
+
+  if (error) {
+    console.error(error);
+    Swal.fire("Error guardando cliente");
+  }
+};
+
+// TOGGLE CONTRASEÑA
+togglePassword?.addEventListener("click", () => {
+  txtPassword.type = txtPassword.type === "password" ? "text" : "password";
+});
+
+toggleConfirmPassword?.addEventListener("click", () => {
+  txtConfirmPassword.type =
+    txtConfirmPassword.type === "password" ? "text" : "password";
+});

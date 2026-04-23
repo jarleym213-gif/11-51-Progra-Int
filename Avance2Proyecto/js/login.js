@@ -14,6 +14,7 @@ const login = async () => {
     return;
   }
 
+  //LOGIN
   const { data, error } = await supabase.auth.signInWithPassword({
     email: correo,
     password: password
@@ -25,10 +26,14 @@ const login = async () => {
     return;
   }
 
+  //  USAR EMAIL REAL DEL USUARIO AUTENTICADO
+  const emailReal = data.user.email;
+
+  //  OBTENER ROL
   const { data: usuarioDB, error: errorRol } = await supabase
     .from("usuarios")
     .select("rol")
-    .eq("correo", correo)
+    .eq("correo", emailReal)
     .maybeSingle();
 
   if (errorRol) {
@@ -39,9 +44,10 @@ const login = async () => {
 
   const rol = usuarioDB?.rol || "vendedor";
 
+  //  GUARDAR USUARIO COMPLETO
   const usuarioCompleto = {
     id: data.user.id,
-    email: data.user.email,
+    email: emailReal,
     rol: rol
   };
 
@@ -52,14 +58,9 @@ const login = async () => {
   window.location.href = "index.html";
 };
 
-if (btnLogin) {
-  btnLogin.addEventListener("click", login);
-}
+// EVENTOS
+btnLogin?.addEventListener("click", login);
 
-if (txtPassword) {
-  txtPassword.addEventListener("keypress", (e) => {
-    if (e.key === "Enter") {
-      login();
-    }
-  });
-}
+txtPassword?.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") login();
+});

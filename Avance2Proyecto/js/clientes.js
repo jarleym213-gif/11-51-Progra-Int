@@ -11,187 +11,18 @@ const txtNombre = document.getElementById("txtNombre");
 const txtCorreo = document.getElementById("txtCorreo");
 const txtTelefono = document.getElementById("txtTelefono");
 const tituloForm = document.getElementById("tituloForm");
+const txtPassword = document.getElementById("txtPassword");
 
-// FUNCIONES
 // VARIABLES GLOBALES
 let rolUsuario = "";
 
-//proteccion de menu
-//const user = JSON.parse(localStorage.getItem("usuario"));
-
-//if (!user || user.rol === "comprador") {
-  //window.location.href = "index.html";
-//}
-
-// CONSULTAR
-const consultarClientes = async () => {
-
-  const { data, error } = await supabase
-    .from("clientes")
-    .select("id,nombre,correo,telefono")
-    .order("id", { ascending: true });
-
-  if (error) {
-    console.error(error);
-    Swal.fire("Error cargando clientes");
-    return;
-  }
-
-  tbody.innerHTML = "";
-
-  data.forEach((c) => {
-
-    const botonesAdmin = rolUsuario === "admin"
-      ? `
-        <button class="btnEditar btn btn-warning btn-sm" data-id="${c.id}">
-          Editar
-        </button>
-        <button class="btnEliminar btn btn-danger btn-sm" data-id="${c.id}">
-          Eliminar
-        </button>
-      `
-      : "";
-
-    const tr = document.createElement("tr");
-
-    tr.innerHTML = `
-      <td>${c.id}</td>
-      <td>${c.nombre}</td>
-      <td>${c.correo}</td>
-      <td>${c.telefono}</td>
-      <td>${botonesAdmin}</td>
-    `;
-
-    tbody.appendChild(tr);
-
-  });
-};
-
-// GUARDAR
-const guardarCliente = async () => {
-
-  const cliente = {
-    nombre: txtNombre.value.trim(),
-    correo: txtCorreo.value.trim(),
-    telefono: txtTelefono.value.trim()
-  };
-
-  if (!cliente.nombre || !cliente.correo || !cliente.telefono) {
-    Swal.fire("Complete todos los campos");
-    return;
-  }
-
-  let error;
-
-  if (txtId.value) {
-
-    const response = await supabase
-      .from("clientes")
-      .update(cliente)
-      .eq("id", txtId.value);
-
-    error = response.error;
-
-  } else {
-
-    const response = await supabase
-      .from("clientes")
-      .insert([cliente]);
-
-    error = response.error;
-
-  }
-
-  if (error) {
-    console.error(error);
-    Swal.fire("Error guardando cliente");
-    return;
-  }
-
-  Swal.fire("Cliente guardado correctamente");
-
-  limpiarFormulario();
-  consultarClientes();
-
-};
-
-// ELIMINAR
-const eliminarCliente = async (id) => {
-  if (rolUsuario !== "admin") return;
- 
-  if (!confirm("¿Eliminar cliente?")) return;
-
-  const { error } = await supabase
-    .from("clientes")
-    .delete()
-    .eq("id", id);
-
-  if (error) {
-    console.error(error);
-    Swal.fire("Error eliminando cliente");
-  } else {
-    consultarClientes();
-  }
-
-};
-
-// LIMPIAR
-const limpiarFormulario = () => {
-  txtId.value = "";
-  txtNombre.value = "";
-  txtCorreo.value = "";
-  txtTelefono.value = "";
-  btnAdd.textContent = "Guardar";
-  tituloForm.textContent = "Agregar Cliente";
-};
-
-// EVENTOS
-if (btnLoad) btnLoad.addEventListener("click", consultarClientes);
-if (btnAdd) btnAdd.addEventListener("click", guardarCliente);
-btnCancel.addEventListener("click", async () => limpiarFormulario());
-// DELEGACIÓN
-tbody.addEventListener("click", async (event) => {
-   
-  const target = event.target;
-  if (rolUsuario !== "admin") return;
-  if (target.classList.contains("btnEliminar")) {
-    const id = target.getAttribute("data-id");
-    await eliminarCliente(id);
-  }
-
-  if (target.classList.contains("btnEditar")) {
-
-    const id = target.getAttribute("data-id");
-
-    const { data, error } = await supabase
-      .from("clientes")
-      .select("*")
-      .eq("id", id)
-      .single();
-
-    if (error) {
-      console.error(error);
-      Swal.fire("Error cargando cliente");
-      return;
-    }
-
-    txtId.value = data.id;
-    txtNombre.value = data.nombre;
-    txtCorreo.value = data.correo;
-    txtTelefono.value = data.telefono;
-    btnAdd.textContent = "Actualizar";
-    tituloForm.textContent = "Editar Cliente";
-  }
-
-});
-
-// INICIALIZACIÓN
-window.onload = async() => {
-   await obtenerRol();
-  console.log("Rol detectado:", rolUsuario);
+// INICIO
+window.onload = async () => {
+  await obtenerRol();
   await consultarClientes();
 };
-// OBTENER ROL USUARIO
+
+// OBTENER ROL DEL USUARIO LOGUEADO
 const obtenerRol = async () => {
   const { data: userData } = await supabase.auth.getUser();
 
@@ -213,6 +44,207 @@ const obtenerRol = async () => {
 
   rolUsuario = (data?.rol || "vendedor").trim().toLowerCase();
 
-  console.log("EMAIL:", userData.user.email);
-  console.log("ROL BD:", data);
+  if (rolUsuario === "comprador") {
+    window.location.href = "index.html";
+  }
 };
+
+// CONSULTAR CLIENTES
+const consultarClientes = async () => {
+  if (!tbody) return;
+
+  const { data, error } = await supabase
+    .from("clientes")
+    .select("id,nombre,correo,telefono,fecha_creacion")
+    .order("id", { ascending: true });
+
+  if (error) {
+    console.error(error);
+    Swal.fire("Error cargando clientes");
+    return;
+  }
+
+  renderClientes(data);
+};
+
+// RENDERIZAR CLIENTES EN LA TABLA
+const renderClientes = (data) => {
+  tbody.innerHTML = "";
+
+  data.forEach((c) => {
+    const botonesAdmin = rolUsuario === "admin"
+      ? `
+        <button class="btnEditar btn btn-warning btn-sm" data-id="${c.id}">Editar</button>
+        <button class="btnEliminar btn btn-danger btn-sm" data-id="${c.id}">Eliminar</button>
+      `
+      : "";
+
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>${c.id}</td>
+      <td>${c.nombre}</td>
+      <td>${c.correo}</td>
+      <td>${c.telefono}</td>
+      <td>${new Date(c.fecha_creacion).toLocaleDateString()}</td>
+      <td>${botonesAdmin}</td>
+    `;
+
+    tbody.appendChild(tr);
+  });
+};
+
+// GUARDAR CLIENTE
+const guardarCliente = async () => {
+
+  const password = txtPassword.value.trim();
+
+  if (!password) {
+    Swal.fire("Debe ingresar contraseña");
+    return;
+  }
+
+  const cliente = {
+    nombre: txtNombre.value.trim(),
+    correo: txtCorreo.value.trim(),
+    telefono: txtTelefono.value.trim()
+  };
+
+  if (!cliente.nombre || !cliente.correo || !cliente.telefono) {
+    Swal.fire("Complete todos los campos");
+    return;
+  }
+
+  // 1. CREAR USUARIO EN AUTH
+  const { data: authData, error: errorAuth } =
+    await supabase.auth.signUp({
+      email: cliente.correo,
+      password: password
+    });
+
+  if (errorAuth || !authData?.user) {
+    console.error(errorAuth);
+    Swal.fire("Error creando usuario");
+    return;
+  }
+
+  const userId = authData.user.id;
+
+  // 2. INSERTAR EN USUARIOS (ROL AUTOMÁTICO COMPRADOR)
+  const { error: errorUsuario } = await supabase
+    .from("usuarios")
+    .insert([{
+      id: userId,
+      correo: cliente.correo,
+      rol: "comprador"
+    }]);
+
+  if (errorUsuario) {
+    console.error(errorUsuario);
+    Swal.fire("Error creando usuario");
+    return;
+  }
+
+  // 3. INSERTAR EN CLIENTES
+  const { error } = await supabase
+    .from("clientes")
+    .insert([{
+      nombre: cliente.nombre,
+      correo: cliente.correo,
+      telefono: cliente.telefono,
+      usuario_id: userId,
+      fecha_creacion: new Date()
+    }]);
+
+  if (error) {
+    console.error(error);
+    Swal.fire("Error guardando cliente");
+    return;
+  }
+
+  Swal.fire("Cliente creado correctamente");
+
+  limpiarFormulario();
+  consultarClientes();
+};
+
+// ELIMINAR CLIENTE
+const eliminarCliente = async (id) => {
+  if (rolUsuario !== "admin") return;
+
+  if (!confirm("¿Eliminar cliente?")) return;
+
+  const { error } = await supabase
+    .from("clientes")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    console.error(error);
+    Swal.fire("Error eliminando cliente");
+    return;
+  }
+
+  Swal.fire("Cliente eliminado");
+  consultarClientes();
+};
+
+// OBTENER CLIENTE POR ID 
+const obtenerClientePorId = async (id) => {
+  const { data, error } = await supabase
+    .from("clientes")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (error) {
+    console.error(error);
+    Swal.fire("Error cargando cliente");
+    return null;
+  }
+
+  return data;
+};
+
+// LIMPIAR FORMULARIO
+const limpiarFormulario = () => {
+  txtId.value = "";
+  txtNombre.value = "";
+  txtCorreo.value = "";
+  txtTelefono.value = "";
+  txtPassword.value = "";
+  btnAdd.textContent = "Guardar";
+  tituloForm.textContent = "Agregar Cliente";
+};
+
+// EVENTOS
+btnLoad?.addEventListener("click", consultarClientes);
+btnAdd?.addEventListener("click", guardarCliente);
+btnCancel?.addEventListener("click", limpiarFormulario);
+
+// EVENT DELEGATION
+tbody?.addEventListener("click", async (event) => {
+  const target = event.target;
+
+  if (rolUsuario !== "admin") return;
+
+  if (target.classList.contains("btnEliminar")) {
+    const id = target.dataset.id;
+    await eliminarCliente(id);
+  }
+
+  if (target.classList.contains("btnEditar")) {
+    const id = target.dataset.id;
+
+    const cliente = await obtenerClientePorId(id);
+    if (!cliente) return;
+
+    txtId.value = cliente.id;
+    txtNombre.value = cliente.nombre;
+    txtCorreo.value = cliente.correo;
+    txtTelefono.value = cliente.telefono;
+
+    btnAdd.textContent = "Actualizar";
+    tituloForm.textContent = "Editar Cliente";
+  }
+});

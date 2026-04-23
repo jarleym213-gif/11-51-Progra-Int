@@ -11,14 +11,23 @@
 </head>
 
 <body>
-    <header class="bg-success text-white text-center p-3">
-        <h1>Clientes</h1>
-        <nav class="login-menu">
-            <ul class="nav-list">
-                <li><span id="usuarioLogueado"></span></li>
-            </ul>
-        </nav>
-    </header>
+    <header class="custom-header">
+
+    <div class="header-container">
+
+        <div class="logo-area">
+            <img src="images/logo.png" alt="Logo Tienda Tech JAR" class="logo">
+            <h1>Clientes</h1>
+        </div>
+
+        <div class="user-box">
+            <i class="fas fa-user-circle"></i>
+            <span id="usuarioLogueado"></span>
+        </div>
+
+    </div>
+
+</header>
     <nav class="nav-menu">
         <ul class="nav-list">
             <li><a href="index.html">Inicio</a></li>
@@ -26,6 +35,12 @@
             <li id="menuClientes" style="display:none;"><a href="clientes.html">Clientes</a></li>
             <li id="menuEmpleados" style="display:none;"><a href="empleados.html">Empleados</a></li>
             <li><a href="contacto.html">Contacto</a></li>
+            <li style="position: relative;">
+                <a href="carrito.html" id="iconoCarrito">
+                     Carrito
+                    <span id="contadorCarrito" class="badge">0</span>
+                </a>
+            </li>
             <li><a href="#" onclick="logout()">Cerrar Sesión</a></li>
         </ul>
     </nav>
@@ -42,6 +57,10 @@
             <div class="col-md-2">
                 <input type="text" id="txtTelefono" class="form-control" placeholder="Teléfono">
             </div>
+            <div class="col-md-2">
+                <input type="password" id="txtPassword" class="form-control" placeholder="Contraseña">
+            </div>
+            
             <div class="col-md-2">
                 <button id="btnAdd" class="btn btn-success w-10">
                     Guardar
@@ -62,6 +81,7 @@
                     <th>Nombre</th>
                     <th>Correo</th>
                     <th>Teléfono</th>
+                    <th>Fecha de Creación</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -75,6 +95,7 @@
         <p>Contacto: <a href="mailto:jarley@gmail.com">Jarley</a></p>
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+     <script type="module" src="js/carrito-utils.js"></script>
     <script src="js/clientes.js" type="module"></script>
     <script src="js/auth.js"></script>
 
