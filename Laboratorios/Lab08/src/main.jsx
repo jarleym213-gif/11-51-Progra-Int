@@ -6,8 +6,8 @@ import "./index.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
+    <BrowserRouter basename="/11-51-Progra-Int/Laboratorios/Lab08/dist/">
+  <App />
+</BrowserRouter>
   </StrictMode>
 );
