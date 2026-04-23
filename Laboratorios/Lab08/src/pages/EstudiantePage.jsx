@@ -77,7 +77,8 @@ function EstudiantePage() {
           form={form}
           setForm={setForm}
           initialForm={initialForm}
-          loadStudents={() => navigate("/")}
+          loadStudents={() => navigate("/estudiantes")}
+          onCancel={() => navigate("/estudiantes")}
         />
       )}
 

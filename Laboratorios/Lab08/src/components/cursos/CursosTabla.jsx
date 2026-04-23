@@ -22,9 +22,9 @@ function CursosTabla({ cursos, handleEdit, handleDelete }) {
               <td>{curso.codigo}</td>
               <td>
                 <div style={{ display: "flex", gap: "8px" }}>
-                  {typeof handleEdit === "function" && <button onClick={() => handleEdit(curso)}>Editar</button>}
+                  {typeof handleEdit === "function" && <button className="btn-accion btn-editar" onClick={() => handleEdit(curso)}>Editar</button>}
 
-                  {typeof handleDelete === "function" && <button onClick={() => handleDelete(curso.id)}>Eliminar</button>}
+                  {typeof handleDelete === "function" && <button className="btn-accion btn-eliminar" onClick={() => handleDelete(curso.id)}>Eliminar</button>}
                 </div>
               </td>
             </tr>

@@ -2,6 +2,7 @@ import { NavLink, Route, Routes } from "react-router-dom";
 import EstudiantePage from "../src/pages/EstudiantePage";
 import ListaEstudiantesPage from "../src/pages/ListaEstudiantePage";
 import ListaCursosPage from "./pages/ListaCursosPage";
+import FormCursosPage from "./pages/FormCursospage";
 
 function App() {
   return (
@@ -43,13 +44,18 @@ function App() {
         <NavLink to="/cursos" className="btn btn-primary">
           Lista de cursos
         </NavLink>
+        <NavLink to="/cursos/nuevo" className="btn btn-primary">
+          Nuevo curso
+        </NavLink>
       </nav>
 
       <Routes>
         <Route path="/estudiantes" element={<ListaEstudiantesPage />} />
         <Route path="/estudiante/nuevo" element={<EstudiantePage />} />
-        <Route path="/editar/:id" element={<EstudiantePage />} />
+        <Route path="/estudiante/editar/:id" element={<EstudiantePage />} />
         <Route path="/cursos" element={<ListaCursosPage />} />
+        <Route path="/cursos/nuevo" element={<FormCursosPage />} />
+        <Route path="/cursos/editar/:id" element={<FormCursosPage />} />
       </Routes>
 
       

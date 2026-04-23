@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { obtenerEstudiantes, eliminarEstudiante } from "../services/estudianteService";
 import BuscarEstudiante from "../components/estudiante/buscarEstudiante";
-import EstudianteTabla from "../components/estudiante/EstudianteTabla";
+import EstudianteTabla from "../components/estudiante/estudianteTabla";
 
 function ListaEstudiantesPage() {
   const [students, setStudents] = useState([]);
@@ -20,7 +20,7 @@ function ListaEstudiantesPage() {
       console.error(error);
       alert(error.message);
     } finally {
-      setLoading(false); // Indicar que ya no se está cargando
+      setLoading(false); // Indicar que se ha terminado de cargar
     }
   };
 
@@ -28,17 +28,17 @@ function ListaEstudiantesPage() {
     loadStudents();
   }, []);
 
-//handleSearch: Ejecuta la búsqueda utilizando el texto ingresado en el campo de búsqueda
+  // Función para mapear el formulario al payload esperado por Supabase
   const handleSearch = async () => {
     await loadStudents(search);
   };
 
-  //handleClearSearch: Limpia el campo de búsqueda y recarga la lista completa de estudiantes
   const handleClearSearch = async () => {
     setSearch("");
     await loadStudents("");
   };
 
+  // Función para mapear el formulario al payload esperado por Supabase
   const handleDelete = async (id) => {
     const ok = confirm("¿Desea eliminar este estudiante?");
     if (!ok) return;
@@ -53,7 +53,7 @@ function ListaEstudiantesPage() {
   };
 
   const handleEdit = (student) => {
-    navigate(`/editar/${student.id}`);
+    navigate(`/estudiante/editar/${student.id}`);
   };
 
   return (

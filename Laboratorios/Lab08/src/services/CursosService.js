@@ -29,7 +29,7 @@ const COLUMNAS_MOSTRAR = "id, nombre, creditos, codigo";
 */
 const mapCursoPayload = (curso) => ({
   nombre: curso.nombre?.trim() || "",
-  creditos: curso.creditos?.trim() || "",
+  creditos: curso.creditos ? Number(curso.creditos) || "" : "",
   codigo: curso.codigo?.trim() || ""
 });
 
