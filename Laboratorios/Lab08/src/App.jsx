@@ -1,4 +1,4 @@
-import { NavLink, Route, Routes } from "react-router-dom";
+import { NavLink, Route, Routes, Navigate } from "react-router-dom";
 import EstudiantePage from "../src/pages/EstudiantePage";
 import ListaEstudiantesPage from "../src/pages/ListaEstudiantePage";
 import ListaCursosPage from "./pages/ListaCursosPage";
@@ -50,6 +50,7 @@ function App() {
       </nav>
 
       <Routes>
+        <Route path="/" element={<ListaEstudiantesPage /> } />
         <Route path="/estudiantes" element={<ListaEstudiantesPage />} />
         <Route path="/estudiante/nuevo" element={<EstudiantePage />} />
         <Route path="/estudiante/editar/:id" element={<EstudiantePage />} />
