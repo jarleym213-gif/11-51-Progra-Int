@@ -50,7 +50,7 @@ function App() {
       </nav>
 
       <Routes>
-        <Route path="/" element={<ListaEstudiantesPage /> } />
+        <Route path="/11-51-Progra-Int/Laboratorios/Lab08/dist/" element={<ListaEstudiantesPage /> } />
         <Route path="/estudiantes" element={<ListaEstudiantesPage />} />
         <Route path="/estudiante/nuevo" element={<EstudiantePage />} />
         <Route path="/estudiante/editar/:id" element={<EstudiantePage />} />
